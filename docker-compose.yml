@@ -1,0 +1,11 @@
+# docker-compose.yml
+
+version: '3'
+services:
+  my-python-app:
+    build:
+      context: example-fn
+      dockerfile: Dockerfile
+    volumes:
+      - ./images:/app-fn/images
+
