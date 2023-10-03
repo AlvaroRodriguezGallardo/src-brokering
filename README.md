@@ -3,7 +3,7 @@ src-brokering for JAE Intro Scholarship
 
 ## Operative system: Ubuntu 20.04
 
-I have used Docker Desktop aplication. The steps for a succesful execution of the container are:
+I have used Docker Desktop aplication. The steps for a succesful execution are:
 
 - docker build -t image1-fn example-fn
 
