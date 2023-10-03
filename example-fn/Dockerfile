@@ -8,4 +8,4 @@ COPY . /example-fn
 
 RUN pip install -r requirements.txt
 
-CMD ["python","exercise_fn.py"]
+CMD ["python","./exercise_fn.py"]
