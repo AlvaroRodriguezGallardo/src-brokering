@@ -6,6 +6,7 @@ WORKDIR /example-fn
 
 COPY . /example-fn
 
+RUN apt-get update && apt-get install -y libgl1-mesa-glx
 RUN pip install -r requirements.txt
 
 CMD ["python","./exercise_fn.py"]
