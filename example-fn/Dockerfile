@@ -1,16 +1,9 @@
-#Dockerfile
+#Dockerfile. Ejecutar en la carpeta donde esté todo lo que quiero copiar a /example-fn de docker
 
 FROM python:3.8
 
-# Copia los archivos de trabajo al contenedor
-COPY exercise_fn.py /app-fn/
-COPY images/perro_husky.jpg /app-fn/images/
+WORKDIR /example-fn
 
-# Establece el directorio de trabajo
-WORKDIR /app-fn
+COPY . /example-fn
 
-# Instala las dependencias de Python (en este caso, OpenCV y NumPy)
-RUN pip install opencv-python-headless numpy
-
-# Ejecuta el script de Python
-CMD ["python", "exercise_fn.py"]
+RUN pip install -r requirements.txt
