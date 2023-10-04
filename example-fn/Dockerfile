@@ -2,6 +2,8 @@
 
 FROM python:3.8
 
+ENV FSOURCE="./"
+
 WORKDIR /example-fn
 
 COPY . /example-fn
@@ -9,4 +11,4 @@ COPY . /example-fn
 RUN apt-get update && apt-get install -y libgl1-mesa-glx
 RUN pip install -r requirements.txt
 
-CMD ["python","./exercise_fn.py"]
+CMD python exercise_fn.py ${FSOURCE}
