@@ -30,6 +30,14 @@ In this step, we create an image called `image1-fn` with a created dockerfile, a
 docker run --name contenedor2-fn -v $(pwd)/example-fn/images:/example-fn/images -e FSOURCE='images' image1-fn
 ```
 
+However, if you are in the folder `example1-fn`, you should run 
+
+```
+docker run --name contenedor2-fn -v $(pwd)/images:/example-fn/images -e FSOURCE='images' image1-fn
+```
+
+We create a conainer called `contenedor2-fn`, and path for mounting the `images` directory is specified. Consequently, result will be in that directory. We write the image we want in te container too. In this example, I specify as argument the folder `images`. Remember that the program needs a path since the folder `example1-fn`
+
 We create a conainer called `contenedor2-fn`, and path for mounting the `images` directory is specified. Consequently, result will be in that directory. We write the image we want in te container too. In this example, I specify as argument the folder `images`. Execution is done in `example-fn`, so it does not appear in path.
 
 
