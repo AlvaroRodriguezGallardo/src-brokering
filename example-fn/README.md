@@ -42,3 +42,9 @@ We create a conainer called `contenedor2-fn`, and path for mounting the `images`
 
 
 Finally, we have executed the programme, which gets edges of the image (or the images in the folder) and save it in the path specificated.
+
+If you want to look which operations are done, after running the container, run
+
+```
+docker logs contenedor2-fn
+```
