@@ -2,7 +2,7 @@
 
 # SRC Brokering
 
-SRC brokering for JAE Intro Scholar
+SRC brokering for JAE Intro Scholarship
 
 ## How to run a function with Docker
 
