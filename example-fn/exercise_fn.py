@@ -53,8 +53,11 @@ if len(sys.argv)==2:
     if os.path.isdir(argument):
         logging.info("It is a folder")
         processFolder(argument)
-    if isAnImage(argument):
+    elif isAnImage(argument):
         logging.info("It is an image")
         processImage(argument)
+    else:
+        logging.error("Please, introduce an argument (image or folder)")
+
 else:
-    print("Please, introduce an argument (iamge or folder)")
+    logging.error("Please, introduce an argument (image or folder)")
