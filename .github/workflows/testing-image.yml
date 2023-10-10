@@ -10,7 +10,8 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '16'
-
+      - name: ls
+        run: ls
       - name: Create an image with Dockerfile
         run: docker build -t image1-fn example-fn
 
