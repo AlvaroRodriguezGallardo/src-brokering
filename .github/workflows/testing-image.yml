@@ -7,9 +7,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/setup-node@v3
         with:
-          path: example-fn
+          node-version: '16'
 
       - name: Create an image with Dockerfile
         run: docker build -t image1-fn example-fn
