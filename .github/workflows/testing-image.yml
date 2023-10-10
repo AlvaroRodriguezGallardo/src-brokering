@@ -6,15 +6,23 @@ jobs:
   testing-images:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/setup-node@v3
-        with:
-          node-version: '16'
-          path: example-fn
-      - name: ls
-        run: ls
-      - name: Create an image with Dockerfile
-        run: docker build -t image1-fn example-fn
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        path: example-fn
 
-      - name: Using a container with the previous image and running the Python script
-        run: docker run --name contenedor2-fn -v $(pwd)/example-fn/images:/example-fn/images -e FSOURCE='images' image1-fn
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '16'
+
+    - name: List files
+      run: ls -R
+
+    - name: Create an image with Dockerfile
+      run: docker build -t image1-fn example-fn
+
+    - name: Using a container with the previous image and running the Python script
+      run: docker run --name contenedor2-fn -v $(pwd)/example-fn/images:/example-fn/images -e FSOURCE='images' image1-fn
+
+Asegúrate de que el Dockerfile se encuentre en la carpeta 'example-fn' de tu repositorio y que tu proyecto sea compatible con Node.js 16 si decides usarlo en tu flujo de trabajo. Además, el paso "List files" muestra el contenido del directorio actual para que puedas verificar que los archivos y carpetas estén en el lugar correcto antes de construir la imagen Docker.
