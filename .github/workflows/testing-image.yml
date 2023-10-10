@@ -1,1 +1,18 @@
+name: testing-image
 
+on: [push]
+
+jobs:
+  testing-images:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          path: example-fn
+
+      - name: Create an image with Dockerfile
+        run: docker build -t image1-fn example-fn
+
+      - name: Using a container with the previous image and running the Python script
+        run: docker run --name contenedor2-fn -v $(pwd)/example-fn/images:/example-fn/images -e FSOURCE='images' image1-fn
