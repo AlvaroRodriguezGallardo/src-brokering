@@ -24,5 +24,3 @@ jobs:
 
     - name: Using a container with the previous image and running the Python script
       run: docker run --name contenedor2-fn -v $(pwd)/example-fn/images:/example-fn/images -e FSOURCE='images' image1-fn
-
-Asegúrate de que el Dockerfile se encuentre en la carpeta 'example-fn' de tu repositorio y que tu proyecto sea compatible con Node.js 16 si decides usarlo en tu flujo de trabajo. Además, el paso "List files" muestra el contenido del directorio actual para que puedas verificar que los archivos y carpetas estén en el lugar correcto antes de construir la imagen Docker.
