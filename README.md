@@ -22,3 +22,8 @@ We create a conainer called `contenedor2-fn`, and path for mounting the `images`
 
 
 Finally, we have executed the programme, which gets the image `perro_husky.jpg` in `images`, gets the face borders and save the result in `images`.
+
+
+*This is a simple version of the program. If you want more complexity, please use one of the next links:*
+example-fn-logging [https://github.com/AlvaroRodriguezGallardo/src-brokering/tree/logging-output]: With this version, you could see hot the program runs with 'docker logs <image>'
+example-fn-optimised [https://github.com/AlvaroRodriguezGallardo/src-brokering/tree/example-fn-optimised]: In this version, Dockerfile use a low weight image
