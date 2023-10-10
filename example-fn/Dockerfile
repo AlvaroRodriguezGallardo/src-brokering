@@ -1,11 +1,5 @@
 FROM python:3-alpine3.6
 
-ENV FSOURCE="./"
-
-WORKDIR /example-fn
-
-COPY . /example-fn
-
 RUN echo -e '@edgunity http://nl.alpinelinux.org/alpine/edge/community\n\
 @edge http://nl.alpinelinux.org/alpine/edge/main\n\
 @testing http://nl.alpinelinux.org/alpine/edge/testing\n\
@@ -85,6 +79,10 @@ RUN mkdir -p /opt/opencv-${OPENCV_VERSION}/build && \
   make && \
   make install && \
   rm -rf /opt/opencv-${OPENCV_VERSION}
-  
 
+# --- Customisation ----
+  
+ENV FSOURCE="./"
+WORKDIR /example-fn
+COPY . /example-fn
 CMD python exercise_fn.py ${FSOURCE}
