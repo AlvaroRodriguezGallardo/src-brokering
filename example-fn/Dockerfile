@@ -80,9 +80,3 @@ RUN mkdir -p /opt/opencv-${OPENCV_VERSION}/build && \
   make install && \
   rm -rf /opt/opencv-${OPENCV_VERSION}
 
-# --- Customisation ----
-  
-ENV FSOURCE="./"
-WORKDIR /example-fn
-COPY . /example-fn
-CMD python exercise_fn.py ${FSOURCE}
