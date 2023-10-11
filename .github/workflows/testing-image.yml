@@ -27,18 +27,12 @@ jobs:
 
     - name: Copying 'edges' files
       run: find example-fn/example-fn/images -type f -name '*_edges*' -exec cp {} ./ \;
-    
-    - name: List files
-      run: ls -R
       
     - name: Making a commit
       run: |
         git add *edges*
         git commit -m "Uploading some images"
-
-    - name: git branch
-      run: git branch
       
     - name: Making a push
       run: |
-        git push origin main
+        git push origin master
