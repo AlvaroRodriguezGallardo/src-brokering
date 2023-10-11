@@ -23,11 +23,5 @@ jobs:
     - name: Copying generated images within folder 'images'
       run:  find example-fn/example-fn -type f -name '*_edges*' -exec cp {} example-fn/images/ \;
 
-    - name: Making a cd
-      run: cd example-fn/example-fn/images
-
-    - name: Making an ls in folder /images
-      run: ls
-
-    - name: Making an ls -R
-      run: ls -R
+    - name: Making a ls in images
+      run: ls example-fn/example-fn/images
