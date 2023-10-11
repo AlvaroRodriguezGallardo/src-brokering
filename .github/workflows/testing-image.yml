@@ -21,4 +21,4 @@ jobs:
       run: docker run --name contenedor2-fn -v $(pwd)/example-fn/example-fn/images:/example-fn/images -e FSOURCE='images' image1-fn
 
     - name: Copying generated images within folder 'images'
-      run:  find path/to/generated/images -type f -name '*_edges*' -exec cp {} images/ \;
+      run:  find example-fn/example-fn -type f -name '*_edges*' -exec cp {} example-fn/images/ \;
