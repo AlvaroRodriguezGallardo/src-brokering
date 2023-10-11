@@ -11,10 +11,11 @@ jobs:
       with:
         path: example-fn
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v2
-      with:
-        node-version: '16'
+    - name: Un cd
+      run: cd example-fn
+
+    - name: Listar
+      run : List files
 
     - name: List files
       run: ls -R
