@@ -20,6 +20,9 @@ jobs:
     - name: Copying 'edges' files
       run: find example-fn/example-fn/images -type f -name '*_edges*' -exec cp {} ./ \;
 
+    - name: git init
+      run: git init
+
     - name: Uploading files
       run: |
           git config --global user.name "GitHub Actions"
@@ -28,5 +31,5 @@ jobs:
     - name: Commiting
       run: | 
           git add *edges*
-          git commit -m "Commiting edge files"
+          git commit -am "Commiting edge files"
           git push
