@@ -11,17 +11,16 @@ jobs:
       with:
         path: example-fn
 
-    - name: List files
-      run: ls -R
+
 
     - name: Create an image with Dockerfile
       run: docker build -t image1-fn example-fn/example-fn
 
     - name: Using a container with the previous image and running the Python script
       run: docker run --name contenedor2-fn -v $(pwd)/example-fn/example-fn/images:/example-fn/images -e FSOURCE='images' image1-fn
-
-    - name: Copying generated images within folder 'images'
-      run:  find example-fn/example-fn -type f -name '*_edges*' -exec cp {} example-fn/images/ \;
+    - name: List files
+      run: ls -R
+   
 
     - name: Changes for git
       run: git add example-fn/example-fn/images/*edges* && git commit -m
