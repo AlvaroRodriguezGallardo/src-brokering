@@ -17,6 +17,12 @@ jobs:
     - name: Using a container with the previous image and running the Python script
       run: docker run --name contenedor2-fn -v $(pwd)/example-fn/example-fn/images:/example-fn/images -e FSOURCE='images' image1-fn
 
+    - name: Cre
+      run: git config --global user.name "AlvaroRodriguezGallardo"
+
+    - name: email
+      run: git config --global user.email "alvaro155w@gmail.com"
+
     - name: Cloning repository
       run: git clone git@github.com:AlvaroRodriguezGallardo/src-brokering.git
 
