@@ -19,8 +19,8 @@ jobs:
 
     - name: Credentials for Git
       run: |
-        git config user.mail "alvaro155w@gmail.com"
         git config user.name "AlvaroRodriguezGallardo"
+        git config user.mail "alvaro155w@gmail.com"
 
     - name: Making a commit
       run: |
