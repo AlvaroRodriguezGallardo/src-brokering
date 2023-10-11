@@ -5,6 +5,9 @@ on: [push]
 jobs:
   testing-images:
     runs-on: ubuntu-latest
+    env:
+      CI_COMMIT_MESSAGE: Commiting changes
+      CI_COMMIT_AUTHOR: AlvaroRodriguezGallardo
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -17,23 +20,29 @@ jobs:
     - name: Using a container with the previous image and running the Python script
       run: docker run --name contenedor2-fn -v $(pwd)/example-fn/example-fn/images:/example-fn/images -e FSOURCE='images' image1-fn
 
-    - name: git init
-      run: git init
+#    - name: git init
+#      run: git init
       
-    - name: Credentials for Git
-      run: |
-        git config user.name "AlvaroRodriguezGallardo"
-        git config user.email "alvaro155w@gmail.com"
+#    - name: Credentials for Git
+#      run: |
+#        git config user.name "AlvaroRodriguezGallardo"
+#        git config user.email "alvaro155w@gmail.com"
 
       
     - name: Copying 'edges' files
       run: find example-fn/example-fn/images -type f -name '*_edges*' -exec cp {} ./ \;
       
-    - name: Making a commit
-      run: |
-        git add *edges*
-        git commit -m "Uploading some images"
+#    - name: Making a commit
+#      run: |
+#        git add *edges*
+#        git commit -m "Uploading some images"
       
-    - name: Making a push
-      run: |
-        git push origin main
+#    - name: Making a push
+#      run: |
+#        git push origin main
+    - name: Working
+        run:|
+            git config --global user.name "${{ env.CI_COMMIT_AUTHOR }}"
+            git config --global user.email "username@users.noreply.github.com"
+            git commit -a -m "${{ env.CI_COMMIT_MESSAGE }}"
+            git push
