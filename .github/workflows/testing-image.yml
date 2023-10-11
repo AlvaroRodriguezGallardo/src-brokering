@@ -35,4 +35,4 @@ jobs:
       
     - name: Making a push
       run: |
-        git push master main
+        git push origin master
