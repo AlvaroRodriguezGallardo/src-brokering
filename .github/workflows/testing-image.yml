@@ -37,6 +37,7 @@ jobs:
         git commit -m "Uploading some images"
 
     - name: Making a push
-      run: |
-        git remote add main git@github.com:AlvaroRodriguezGallardo/src-brokering.git
-        git push main
+      run: git push origin main
+     # run: |
+        #git remote add main git@github.com:AlvaroRodriguezGallardo/src-brokering.git
+        #git push main
