@@ -22,7 +22,12 @@ jobs:
     
     - name: List files
       run: ls -R
-   
 
-    - name: Changes for git
-      run: git add example-fn/example-fn/images/*edges* && git commit -m
+    - name: Making changes in repository 'add'
+      run: git add *edges*
+
+    - name: Making changes in repository 'commit'
+      run: git commit -m
+
+    - name: Making changes in repository 'push'
+      run: git push
