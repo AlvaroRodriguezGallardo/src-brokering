@@ -11,9 +11,6 @@ jobs:
       with:
         path: example-fn
 
-    - name: Un cd
-      run: cd example-fn
-
     - name: List files
       run: ls -R
 
