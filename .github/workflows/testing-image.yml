@@ -9,7 +9,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
       with:
-        path: example-fn/example-fn
+        path: example-fn
 
     - name: Create an image with Dockerfile
       run: docker build -t image1-fn example-fn/example-fn
