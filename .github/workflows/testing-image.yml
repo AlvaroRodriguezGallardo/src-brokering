@@ -27,6 +27,9 @@ jobs:
 
     - name: Copying 'edges' files
       run: find example-fn/example-fn/images -type f -name '*_edges*' -exec cp {} ./ \;
+
+    - name: git branch
+      run: git branch
       
     - name: Making a commit
       run: |
