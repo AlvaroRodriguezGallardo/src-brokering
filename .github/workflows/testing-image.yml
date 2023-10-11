@@ -9,7 +9,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
       with:
-        path: example-fn
+        path: example-fn/example-fn
 
     - name: List files
       run: ls -R
