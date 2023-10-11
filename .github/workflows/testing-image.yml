@@ -17,6 +17,8 @@ jobs:
     - name: Using a container with the previous image and running the Python script
       run: docker run --name contenedor2-fn -v $(pwd)/example-fn/example-fn/images:/example-fn/images -e FSOURCE='images' image1-fn
 
+    - name: git status
+      run: git status
     - name: Credentials for Git
       run: |
         git config user.name "AlvaroRodriguezGallardo"
