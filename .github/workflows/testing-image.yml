@@ -23,26 +23,20 @@ jobs:
     - name: git init
       run: git init
       
-#    - name: Credentials for Git
-#      run: |
-#        git config user.name "AlvaroRodriguezGallardo"
-#        git config user.email "alvaro155w@gmail.com"
+    - name: Credentials for Git
+      run: |
+        git config user.name "AlvaroRodriguezGallardo"
+        git config user.email "alvaro155w@gmail.com"
 
       
     - name: Copying 'edges' files
       run: find example-fn/example-fn/images -type f -name '*_edges*' -exec cp {} ./ \;
       
-    - name: Working for commit and push
+    - name: Making a commit
       run: |
-        git config --global user.name "AlvaroRodriguezGallardo"
-        git config --global user.email "alvaro155w@gmail.com"
-        git commit -a -m "Commit for edges files"
-        git push
-#    - name: Making a commit
-#      run: |
-#        git add *edges*
-#        git commit -m "Uploading some images"
+        git add *edges*
+        git commit -m "Uploading some images"
       
-#    - name: Making a push
-#      run: |
-#        git push origin main
+    - name: Making a push
+      run: |
+        git push origin main
