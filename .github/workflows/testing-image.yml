@@ -36,6 +36,9 @@ jobs:
         git add *edges*
         git commit -m "Uploading some images"
 
+    - name: git branch
+      run: git branch
+      
     - name: Making a push
       run: |
         git push origin main
