@@ -38,4 +38,4 @@ jobs:
 
     - name: Making a push
       run: |
-        git push
+        git push origin main
