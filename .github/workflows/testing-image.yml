@@ -17,25 +17,29 @@ jobs:
     - name: Using a container with the previous image and running the Python script
       run: docker run --name contenedor2-fn -v $(pwd)/example-fn/example-fn/images:/example-fn/images -e FSOURCE='images' image1-fn
 
-    - name: git init
-      run: git init
+#    - name: git init
+#      run: git init
       
-    - name: Credentials for Git
-      run: |
-        git config user.name "AlvaroRodriguezGallardo"
-        git config user.email "alvaro155w@gmail.com"
+#    - name: Credentials for Git
+#      run: |
+#        git config user.name "AlvaroRodriguezGallardo"
+#        git config user.email "alvaro155w@gmail.com"
 
-    - name: git branch
-      run: git branch
       
     - name: Copying 'edges' files
       run: find example-fn/example-fn/images -type f -name '*_edges*' -exec cp {} ./ \;
       
-    - name: Making a commit
+    - name: Working for commit and push
       run: |
-        git add *edges*
-        git commit -m "Uploading some images"
+        git config --global user.name "AlvaroRodriguezGallardo"
+        git config --global user.email "alvaro155w@gmail.com"
+        git commit -a -m "Commit for edges files"
+        git push
+#    - name: Making a commit
+#      run: |
+#        git add *edges*
+#        git commit -m "Uploading some images"
       
-    - name: Making a push
-      run: |
-        git push origin main
+#    - name: Making a push
+#      run: |
+#        git push origin main
