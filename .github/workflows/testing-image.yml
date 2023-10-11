@@ -9,13 +9,13 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
       with:
-        path: example-fn/example-fn
+        path: example-fn
 
     - name: List files
       run: ls -R
 
     - name: Create an image with Dockerfile
-      run: docker build -t image1-fn example-fn
+      run: docker build -t image1-fn example-fn/example-fn
 
     - name: Using a container with the previous image and running the Python script
-      run: docker run --name contenedor2-fn -v $(pwd)/example-fn/images:/example-fn/images -e FSOURCE='images' image1-fn
+      run: docker run --name contenedor2-fn -v $(pwd)/example-fn/example-fn/images:/example-fn/images -e FSOURCE='images' image1-fn
