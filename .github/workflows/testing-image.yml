@@ -23,7 +23,7 @@ jobs:
     - name: Credentials for Git
       run: |
         git config user.name "AlvaroRodriguezGallardo"
-        git config user.mail "alvaro155w@gmail.com"
+        git config user.email "alvaro155w@gmail.com"
 
     - name: Copying 'edges' files
       run: find example-fn/example-fn/images -type f -name '*_edges*' -exec cp {} ./ \;
