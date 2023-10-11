@@ -14,9 +14,6 @@ jobs:
     - name: Un cd
       run: cd example-fn
 
-    - name: Listar
-      run : List files
-
     - name: List files
       run: ls -R
 
