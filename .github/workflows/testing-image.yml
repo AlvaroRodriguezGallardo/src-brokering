@@ -23,10 +23,8 @@ jobs:
     - name: Copying generated images within folder 'images'
       run:  find example-fn/example-fn -type f -name '*_edges*' -exec cp {} example-fn/images/ \;
 
-    - name: Making a commit for changes in the repository
-      run: |
-        git config --global user.email "alvaro155w@gmail.com"
-        git config --global user.name "AlvaroRodriguezGallardo"
-        git add example-fn/images
-        git commit -m "Making a commit for changes"
-        git push
+    - name: Making a cd
+      run: cd example-fn
+
+    - name: Making an ls
+      run: ls
