@@ -26,5 +26,5 @@ jobs:
     - name: Making a cd
       run: cd example-fn
 
-    - name: Making an ls
-      run: ls
+    - name: Making an ls -R
+      run: ls -R
