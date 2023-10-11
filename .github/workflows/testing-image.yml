@@ -25,7 +25,10 @@ jobs:
       
     - name: Copying 'edges' files
       run: find example-fn/example-fn/images -type f -name '*_edges*' -exec cp {} ./ \;
-
+    - name: Credentials for Git
+      run: |
+        git config user.name "AlvaroRodriguezGallardo"
+        git config user.email "alvaro155w@gmail.com"
 #    - name: Working
 #      run: |
 #            git config --global user.name "${{ env.CI_COMMIT_AUTHOR }}"
@@ -36,10 +39,7 @@ jobs:
       run: |
         git add *edges*
         git commit -m "Uploading some images"
-    - name: Credentials for Git
-      run: |
-        git config user.name "AlvaroRodriguezGallardo"
-        git config user.email "alvaro155w@gmail.com"
+
     - name: Making a push
       run: |
         git push origin main
