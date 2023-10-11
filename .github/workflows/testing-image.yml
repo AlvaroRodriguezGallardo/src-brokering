@@ -26,7 +26,7 @@ jobs:
           git config --global user.email "actions@github.com"
           
     - name: Commiting
-    - run: | 
+      run: | 
           git add *edges*
           git commit -m "Commiting edge files"
           git push
