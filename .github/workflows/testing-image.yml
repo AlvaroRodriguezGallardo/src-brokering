@@ -17,6 +17,12 @@ jobs:
     - name: Using a container with the previous image and running the Python script
       run: docker run --name contenedor2-fn -v $(pwd)/example-fn/example-fn/images:/example-fn/images -e FSOURCE='images' image1-fn
 
+    - name: Cloning repository
+      run: clone git@github.com:AlvaroRodriguezGallardo/src-brokering.git
+
+    - name: List files
+      run: ls -R
+
     - name: Copying generated images within folder 'images'
       run:  find example-fn/example-fn/images -type f -name '*_edges*' -exec cp {} ./ \;
     
