@@ -18,7 +18,7 @@ jobs:
       run: docker run --name contenedor2-fn -v $(pwd)/example-fn/example-fn/images:/example-fn/images -e FSOURCE='images' image1-fn
 
     - name: Cloning repository
-      run: clone git@github.com:AlvaroRodriguezGallardo/src-brokering.git
+      run: git clone git@github.com:AlvaroRodriguezGallardo/src-brokering.git
 
     - name: List files
       run: ls -R
