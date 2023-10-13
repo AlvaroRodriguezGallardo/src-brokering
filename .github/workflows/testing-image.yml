@@ -17,8 +17,8 @@ jobs:
       
     - name: Config
       run: |
-          git config user.name "AlvaroRodriguezGallardo"
-          git config user.email "alvaro155w@gmail.com"
+          git config --local user.name "AlvaroRodriguezGallardo"
+          git config --local user.email "alvaro155w@gmail.com"
 
     - name: Create an image with Dockerfile
       run: docker build -t image1-fn example-fn/example-fn
@@ -29,22 +29,13 @@ jobs:
     - name: Copying 'edges' files
       run: find example-fn/example-fn/images -type f -name '*_edges*' -exec cp {} ./ \;
 
-    - name: git tag
-      run: git tag
-
     - name: git branch -M main
       run: git branch -M main
-
-    - name: git tag
-      run: git tag
       
     - name: Commiting
       run: | 
           git add *edges*
           git commit -am "Commiting edge files"
-
-    - name: git tag
-      run: git tag
           
     - name: Pushing
       run: git push origin main
