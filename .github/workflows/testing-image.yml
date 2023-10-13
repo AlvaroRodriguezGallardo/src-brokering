@@ -17,8 +17,8 @@ jobs:
       
     - name: Config
       run: |
-          git config --local user.name "AlvaroRodriguezGallardo"
-          git config --local user.email "alvaro155w@gmail.com"
+          git config --local user.name "github-actions"
+          git config --local user.email "github-actions@users.noreply.github.com"
 
     - name: Create an image with Dockerfile
       run: docker build -t image1-fn example-fn/example-fn
@@ -28,9 +28,6 @@ jobs:
       
     - name: Copying 'edges' files
       run: find example-fn/example-fn/images -type f -name '*_edges*' -exec cp {} ./ \;
-
-    - name: git branch -M main
-      run: git branch -M main
       
     - name: Commiting
       run: | 
