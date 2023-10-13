@@ -12,13 +12,6 @@ jobs:
       with:
         path: example-fn
 
-   # - name: Setting up SSH for connecting to git
-   #   run: |
-   #     ssh-keygen -t rsa -b 4096 -C "alvaro155w@gmail.com" -f ~/.ssh/id_rsa
-   #     eval "$(ssh-agent -s)"
-   #     ssh-add ~/.ssh/id_rsa
-   #     cat ~/.ssh/id_rsa.pub | xclip
-
     - name: git init
       run: git init
       
@@ -36,23 +29,22 @@ jobs:
     - name: Copying 'edges' files
       run: find example-fn/example-fn/images -type f -name '*_edges*' -exec cp {} ./ \;
 
-    - name: git status
-      run: git status
+    - name: git tag
+      run: git tag
 
     - name: git branch -M main
       run: git branch -M main
 
-    - name: git status
-      run: git status
+    - name: git tag
+      run: git tag
       
     - name: Commiting
       run: | 
           git add *edges*
           git commit -am "Commiting edge files"
 
-    - name: git status
-      run: git status
+    - name: git tag
+      run: git tag
           
     - name: Pushing
       run: git push origin main
-
