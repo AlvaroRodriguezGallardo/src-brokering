@@ -35,4 +35,6 @@ jobs:
           git commit -am "Commiting edge files"
           
     - name: Pushing
-      run: git push origin main
+      run: |
+        git remote set-url origin https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}
+        git push origin main
