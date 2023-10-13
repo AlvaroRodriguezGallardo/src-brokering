@@ -35,6 +35,9 @@ jobs:
 
     - name: git branch -M main
       run: git branch -M main
+
+    - name: git branch
+      run: git branch
           
     - name: Pushing
       run: git push
