@@ -30,7 +30,7 @@ jobs:
 
     - name: Making config
       run: |
-        git config --global credential.helper store
+        git config --global credential.helper "cache --timeout=3600"
         git credential reject
         git credential approve
         echo "https://github.com.username=AlvaroRodriguezGallardo" > ~/.git-credentials
