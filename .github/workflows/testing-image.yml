@@ -40,4 +40,4 @@ jobs:
       run: git branch
           
     - name: Pushing
-      run: git push origin main
+      run: git push main
