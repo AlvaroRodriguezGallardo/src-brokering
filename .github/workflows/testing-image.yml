@@ -10,7 +10,7 @@ jobs:
       uses: actions/checkout@v3
       with:
         path: example-fn
-        token: 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
+        token: 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
 
     - name: Create an image with Dockerfile
       run: docker build -t image1-fn example-fn/example-fn
