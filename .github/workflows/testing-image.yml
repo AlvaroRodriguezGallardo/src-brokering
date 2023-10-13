@@ -19,8 +19,6 @@ jobs:
       run: |
           git config --local user.name "github-actions"
           git config --local user.email "github-actions@users.noreply.github.com"
-
-    - run: echo "is-auto-commit=true" >> $GITHUB_ENV
     
     - name: Create an image with Dockerfile
       run: docker build -t image1-fn example-fn/example-fn
@@ -36,6 +34,8 @@ jobs:
           git add .
           git commit -am "Commiting edge files"
           
+#    - name: Pushing
+#      run: git push origin main
+
     - name: Pushing
-      run: |
-        git push origin main
+      run: git push
