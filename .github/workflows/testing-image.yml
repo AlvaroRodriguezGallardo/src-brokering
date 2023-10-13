@@ -10,18 +10,10 @@ jobs:
     - name: git init
       run: git init
 
-    - name: Uploading files
+    - name: Config
       run: |
           git config --global user.name "AlvaroRodriguezGallardo"
           git config --global user.email "alvaro155w@gmail.com"
-
-    - name: Making config
-      run: |
-        git config --global credential.helper "cache --timeout=3600"
-        git credential reject
-        git credential approve
-        echo "https://github.com.username=AlvaroRodriguezGallardo" > ~/.git-credentials
-        echo "https://github.com.password=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" >> ~/git-credentials
     
     - name: Checkout
       uses: actions/checkout@v3
