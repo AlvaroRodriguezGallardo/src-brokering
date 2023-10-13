@@ -31,7 +31,7 @@ jobs:
       
     - name: Commiting
       run: | 
-          git add *edges*
+          git add .
           git commit -am "Commiting edge files"
           
     - name: Pushing
