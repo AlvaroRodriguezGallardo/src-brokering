@@ -19,6 +19,9 @@ jobs:
    #     ssh-add ~/.ssh/id_rsa
    #     cat ~/.ssh/id_rsa.pub | xclip
 
+    - name: git init
+      run: git init
+      
     - name: Config
       run: |
           git config user.name "AlvaroRodriguezGallardo"
