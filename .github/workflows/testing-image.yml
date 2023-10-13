@@ -38,5 +38,5 @@ jobs:
       run: git branch -M main
           
     - name: Pushing
-      run: git push https://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@github.com/AlvaroRodriguezGallardo/src-brokering.git main
+      run: git push https://github.com/AlvaroRodriguezGallardo/src-brokering.git main
 
