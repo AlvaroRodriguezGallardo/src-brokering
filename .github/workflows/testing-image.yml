@@ -28,8 +28,6 @@ jobs:
       
  #   - name: Copying 'edges' files
   #    run: find example-fn/example-fn/images -type f -name '*_edges*' -exec cp {} ./ \;
-    - name: git branch -M main
-      run: git branch -M main
       
     - name: Commiting
       run: | 
@@ -41,6 +39,6 @@ jobs:
 
     - name: Pushing
       run: |
-        git push --set-upstream main main
+        git push --set-upstream master main
         git remote add main git@github.com:AlvaroRodriguezGallardo/src-brokering.git
         git push main
