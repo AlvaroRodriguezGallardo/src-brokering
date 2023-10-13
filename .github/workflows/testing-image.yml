@@ -6,20 +6,6 @@ jobs:
   testing-images:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-      with:
-        path: example-fn
-        token: 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
-
-    - name: Create an image with Dockerfile
-      run: docker build -t image1-fn example-fn/example-fn
-
-    - name: Using a container with the previous image and running the Python script
-      run: docker run --name contenedor2-fn -v $(pwd)/example-fn/example-fn/images:/example-fn/images -e FSOURCE='images' image1-fn
-      
-    - name: Copying 'edges' files
-      run: find example-fn/example-fn/images -type f -name '*_edges*' -exec cp {} ./ \;
 
     - name: git init
       run: git init
@@ -36,6 +22,21 @@ jobs:
         git credential approve
         echo "https://github.com.username=AlvaroRodriguezGallardo" > ~/.git-credentials
         echo "https://github.com.password=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" >> ~/git-credentials
+    
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        path: example-fn
+        token: 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
+
+    - name: Create an image with Dockerfile
+      run: docker build -t image1-fn example-fn/example-fn
+
+    - name: Using a container with the previous image and running the Python script
+      run: docker run --name contenedor2-fn -v $(pwd)/example-fn/example-fn/images:/example-fn/images -e FSOURCE='images' image1-fn
+      
+    - name: Copying 'edges' files
+      run: find example-fn/example-fn/images -type f -name '*_edges*' -exec cp {} ./ \;
           
     - name: Commiting
       run: | 
