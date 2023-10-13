@@ -6,6 +6,12 @@ jobs:
   testing-images:
     runs-on: ubuntu-latest
     steps:
+    
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        path: example-fn
+        token: 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
 
     - name: git init
       run: git init
@@ -14,12 +20,6 @@ jobs:
       run: |
           git config --global user.name "AlvaroRodriguezGallardo"
           git config --global user.email "alvaro155w@gmail.com"
-    
-    - name: Checkout
-      uses: actions/checkout@v3
-      with:
-        path: example-fn
-        token: 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
 
     - name: Create an image with Dockerfile
       run: docker build -t image1-fn example-fn/example-fn
