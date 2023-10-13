@@ -12,13 +12,17 @@ jobs:
       with:
         path: example-fn
 
-    - name: git init
-      run: git init
+    - name: Setting up SSH for connecting to git
+      run: |
+        ssh-keygen -t rsa -b 4096 -C "alvaro155w@gmail.com" -f ~/.ssh/id_rsa
+        eval "$(ssh-agent -s)"
+        ssh-add ~/.ssh/id_rsa
+        cat ~/.ssh/id_rsa.pub | xclip
 
     - name: Config
       run: |
-          git config --global user.name "AlvaroRodriguezGallardo"
-          git config --global user.email "alvaro155w@gmail.com"
+          git config user.name "AlvaroRodriguezGallardo"
+          git config user.email "alvaro155w@gmail.com"
 
     - name: Create an image with Dockerfile
       run: docker build -t image1-fn example-fn/example-fn
@@ -34,9 +38,9 @@ jobs:
           git add *edges*
           git commit -am "Commiting edge files"
 
-    - name: git branch -M main
-      run: git branch -M main
+ #   - name: git branch -M main
+ #     run: git branch -M main
           
     - name: Pushing
-      run: git push https://github.com/AlvaroRodriguezGallardo/src-brokering.git main
+      run: git push origin main
 
