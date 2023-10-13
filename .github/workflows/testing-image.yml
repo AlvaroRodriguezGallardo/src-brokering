@@ -38,14 +38,17 @@ jobs:
 
     - name: git status
       run: git status
+
+    - name: git branch -M main
+      run: git branch -M main
+
+    - name: git status
+      run: git status
       
     - name: Commiting
       run: | 
           git add *edges*
           git commit -am "Commiting edge files"
-
-    - name: git branch -M main
-      run: git branch -M main
 
     - name: git status
       run: git status
