@@ -35,11 +35,17 @@ jobs:
       
     - name: Copying 'edges' files
       run: find example-fn/example-fn/images -type f -name '*_edges*' -exec cp {} ./ \;
-          
+
+    - name: git status
+      run: git status
+      
     - name: Commiting
       run: | 
           git add *edges*
           git commit -am "Commiting edge files"
+
+    - name: git status
+      run: git status
 
     - name: git branch -M main
       run: git branch -M main
