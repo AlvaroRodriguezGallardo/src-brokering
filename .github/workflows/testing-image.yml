@@ -41,5 +41,6 @@ jobs:
 
     - name: Pushing
       run: |
+        git push --set-upstream main main
         git remote add main git@github.com:AlvaroRodriguezGallardo/src-brokering.git
         git push main
