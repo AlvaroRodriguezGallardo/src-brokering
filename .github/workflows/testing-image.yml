@@ -26,8 +26,8 @@ jobs:
     - name: Using a container with the previous image and running the Python script
       run: docker run --name contenedor2-fn -v $(pwd)/example-fn/example-fn/images:/example-fn/images -e FSOURCE='images' image1-fn
       
-    - name: Copying 'edges' files
-      run: find example-fn/example-fn/images -type f -name '*_edges*' -exec cp {} ./ \;
+ #   - name: Copying 'edges' files
+  #    run: find example-fn/example-fn/images -type f -name '*_edges*' -exec cp {} ./ \;
       
     - name: Commiting
       run: | 
@@ -36,5 +36,4 @@ jobs:
           
     - name: Pushing
       run: |
-        git remote set-url https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}
         git push origin main
