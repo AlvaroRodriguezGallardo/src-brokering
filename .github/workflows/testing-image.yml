@@ -20,6 +20,8 @@ jobs:
           git config --local user.name "github-actions"
           git config --local user.email "github-actions@users.noreply.github.com"
 
+    - run: echo "is-auto-commit=true" >> $GITHUB_ENV
+    
     - name: Create an image with Dockerfile
       run: docker build -t image1-fn example-fn/example-fn
 
