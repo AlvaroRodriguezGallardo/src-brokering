@@ -32,4 +32,9 @@ jobs:
       run: | 
           git add *edges*
           git commit -am "Commiting edge files"
-          git push
+
+    - name: git branch -M main
+      run: git branch -M main
+          
+    - name: Pushing
+      run: git push
