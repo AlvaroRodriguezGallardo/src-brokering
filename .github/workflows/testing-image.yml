@@ -27,6 +27,14 @@ jobs:
       run: |
           git config --global user.name "AlvaroRodriguezGallardo"
           git config --global user.email "alvaro155w@gmail.com"
+
+    - name: Making config
+      run: |
+        git config --global credential.helper store
+        git credential reject
+        git credential approve
+        echo "https://github.com.username=AlvaroRodriguezGallardo" > ~/.git-credentials
+        echo "https://github.com.password=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" >> ~/git-credentials
           
     - name: Commiting
       run: | 
@@ -35,9 +43,6 @@ jobs:
 
     - name: git branch -M main
       run: git branch -M main
-
-    - name: git branch
-      run: git branch
           
     - name: Pushing
-      run: git push main
+      run: git push origin main
