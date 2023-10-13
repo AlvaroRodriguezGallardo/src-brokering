@@ -12,12 +12,12 @@ jobs:
       with:
         path: example-fn
 
-    - name: Setting up SSH for connecting to git
-      run: |
-        ssh-keygen -t rsa -b 4096 -C "alvaro155w@gmail.com" -f ~/.ssh/id_rsa
-        eval "$(ssh-agent -s)"
-        ssh-add ~/.ssh/id_rsa
-        cat ~/.ssh/id_rsa.pub | xclip
+   # - name: Setting up SSH for connecting to git
+   #   run: |
+   #     ssh-keygen -t rsa -b 4096 -C "alvaro155w@gmail.com" -f ~/.ssh/id_rsa
+   #     eval "$(ssh-agent -s)"
+   #     ssh-add ~/.ssh/id_rsa
+   #     cat ~/.ssh/id_rsa.pub | xclip
 
     - name: Config
       run: |
