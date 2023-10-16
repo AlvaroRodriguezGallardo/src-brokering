@@ -30,6 +30,11 @@ jobs:
             USERNAME: github-actions[bot]
       run: |
             cd example-fn
+    - name: More results     
+      env:
+            REPO_KEY: ${{ secrets.GITHUB_TOKEN }}
+            USERNAME: github-actions[bot]
+      run: |
             git config --local user.name "$USERNAME"
             git config --local user.email "alvaro155w@gmail.com"
             git add -A
