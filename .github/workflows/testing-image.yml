@@ -6,6 +6,8 @@ on:
                     - main
             paths:
                     - 'example-fn/images/**'
+            types:
+                    - added
 jobs:
   testing-images:
     runs-on: ubuntu-latest
