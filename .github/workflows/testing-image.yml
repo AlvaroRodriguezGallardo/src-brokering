@@ -27,7 +27,7 @@ jobs:
     - name: Publish results
       env:
             REPO_KEY: ${{ secrets.GITHUB_TOKEN }}
-            USERNAME: AlvaroRodriguezGallardo
+            USERNAME: github-actions[bot]
       run: |
             cd example-fn
             git config --local user.name "$USERNAME"
