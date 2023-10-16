@@ -1,9 +1,7 @@
 name: testing-image
 
-on: 
-    push:
-            types:
-                    - add
+on: [push]
+
 jobs:
   testing-images:
     runs-on: ubuntu-latest
