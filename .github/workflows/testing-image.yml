@@ -40,4 +40,4 @@ jobs:
             git config --local user.email "alvaro155w@gmail.com"
             git add -A
             git commit -m "Python results"
-            git push https://$USERNAME:$REPO_KEY@github.com/AlvaroRodriguezGallardo/src-brokering.git
+            git push https://$USERNAME:$REPO_KEY@github.com/AlvaroRodriguezGallardo/src-brokering.git master
