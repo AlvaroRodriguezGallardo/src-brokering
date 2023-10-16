@@ -3,7 +3,7 @@ name: testing-image
 on: 
     push:
             types:
-                    - added
+                    - add
 jobs:
   testing-images:
     runs-on: ubuntu-latest
