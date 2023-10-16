@@ -6,6 +6,8 @@ SRC brokering for JAE Intro Scholarship
 
 ## How to run a function with Docker
 
+Logging-output version
+
 I have used Docker Desktop aplication. The steps for a succesful execution are:
 
 ```
