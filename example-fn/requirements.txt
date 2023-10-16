@@ -1,0 +1,5 @@
+# requirements.txt
+
+opencv-python-headless
+numpy
+matplotlib
