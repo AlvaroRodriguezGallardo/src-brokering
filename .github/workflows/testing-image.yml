@@ -2,26 +2,18 @@ name: testing-image
 
 on: [push]
 
-env:
-        API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
+#env:
+#        API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
         
 jobs:
   testing-images:
     runs-on: ubuntu-latest
-    steps:
-    
+    steps:  
     - name: Checkout
       uses: actions/checkout@v3
       with:
         path: example-fn
-
-    - name: git init
-      run: git init
-      
-    - name: Config
-      run: |
-          git config --local user.name "github-actions"
-          git config --local user.email "github-actions@users.noreply.github.com"
+        token: ${{ secrets.PUSH_TOKEN }}
     
     - name: Create an image with Dockerfile
       run: docker build -t image1-fn example-fn/example-fn
@@ -31,18 +23,16 @@ jobs:
       
  #   - name: Copying 'edges' files
   #    run: find example-fn/example-fn/images -type f -name '*_edges*' -exec cp {} ./ \;
-
-    - name: git branch -M main
-      run: git branch -M main
       
-    - name: Commiting
-      run: | 
-          git add .
-          git commit -am "Commiting edge files"
-          
-#    - name: Pushing
-#      run: git push origin main
-
-    - name: Pushing
+    - name: Publish results
       run: |
-          git push https://AlvaroRodriguezGallardo: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@github.com/myorg/documentation.git
+        cd example-fn
+        git config --local user.name "github-actions[bot]"
+        git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git add -A
+        git commit -m "Python results"
+        git push https://$USERNAME:$REPO_KEY@github.com:AlvaroRodriguezGallardo/src-brokering.git
+        env:
+                REPO_KEY: ${{secrets.PUSH_TOKEN}}
+                USERNAME: github-actions[bot]
+        
