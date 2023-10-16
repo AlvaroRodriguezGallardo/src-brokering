@@ -29,7 +29,7 @@ jobs:
     - name: Publish results
       if: ${{ steps.check_push_author.outputs.push_author != '41898282+github-actions[bot]@users.noreply.github.com' }}
       run: |
-            cd example-fn
+            cd example-fn-logging
             ls
             git config --local user.name "$USERNAME"
             git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
