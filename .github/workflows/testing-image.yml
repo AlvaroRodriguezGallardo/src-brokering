@@ -14,7 +14,8 @@ jobs:
       with:
         path: example-fn
         token: ${{ secrets.GITHUB_TOKEN }}
-    
+    - name: git init
+      run: git init
     - name: Create an image with Dockerfile
       run: docker build -t image1-fn example-fn/example-fn
 
