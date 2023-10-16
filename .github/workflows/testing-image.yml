@@ -2,8 +2,6 @@ name: testing-image
 
 on: 
     push:
-            branches:
-                    - main
             types:
                     - added
 jobs:
