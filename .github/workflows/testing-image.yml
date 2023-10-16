@@ -13,7 +13,7 @@ jobs:
       uses: actions/checkout@v3
       with:
         path: example-fn
-        token: ${{ secrets.PUSH_TOKEN }}
+        token: ${{ secrets.GITHUB_TOKEN }}
     
     - name: Create an image with Dockerfile
       run: docker build -t image1-fn example-fn/example-fn
@@ -33,6 +33,6 @@ jobs:
         git commit -m "Python results"
         git push https://$USERNAME:$REPO_KEY@github.com:AlvaroRodriguezGallardo/src-brokering.git
         env:
-                REPO_KEY: ${{secrets.PUSH_TOKEN}}
+                REPO_KEY: ${{secrets.GITHUB_TOKEN}}
                 USERNAME: github-actions[bot]
         
