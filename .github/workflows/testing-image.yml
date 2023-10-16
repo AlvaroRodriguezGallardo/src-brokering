@@ -1,6 +1,11 @@
 name: testing-image
 
-on: [push]
+on: 
+  push:
+    paths:
+      - '**'
+    types:
+      - added
 
 jobs:
   testing-images:
