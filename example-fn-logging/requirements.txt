@@ -1,4 +1,4 @@
-# requirements.txt for logging-output branch
+# requirements.txt
 
 opencv-python-headless
 numpy
