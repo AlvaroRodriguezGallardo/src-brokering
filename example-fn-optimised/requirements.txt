@@ -1,4 +1,4 @@
-# requirements.txt for optimised version
+# requirements.txt
 
 opencv-python-headless
 numpy
