@@ -6,7 +6,11 @@ SRC brokering for JAE Intro Scholarship
 
 ## How to run a function with Docker
 
+<<<<<<< HEAD
 Logging-output version
+=======
+Optimised version with Alpine
+>>>>>>> example-fn-optimised
 
 I have used Docker Desktop aplication. The steps for a succesful execution are:
 
