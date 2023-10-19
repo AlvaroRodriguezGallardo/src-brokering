@@ -1,5 +1,6 @@
 name: testing-image
 
+<<<<<<< HEAD
 on: 
   push:
     branches:
@@ -8,6 +9,14 @@ on:
       - 'example-fn'
     types:
       - added
+=======
+on:
+  push:
+    branches:
+      - logging-output
+    paths:
+      - 'example-fn'
+>>>>>>> logging-output
 
 jobs:
   testing-images:
@@ -16,6 +25,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
       with:
+<<<<<<< HEAD
         path: example-fn
         token: ${{ secrets.PUSH_TOKEN }}
         
@@ -24,6 +34,16 @@ jobs:
 
     - name: Using a container with the previous image and running the Python script
       run: docker run --name contenedor2-fn -v $(pwd)/example-fn/example-fn/images:/example-fn/images -e FSOURCE='images' image1-fn
+=======
+        path: example-fn-logging
+        token: ${{ secrets.PUSH_TOKEN }}
+        
+    - name: Create an image with Dockerfile
+      run: docker build -t image1-fn example-fn-logging/example-fn-logging
+
+    - name: Using a container with the previous image and running the Python script
+      run: docker run --name contenedor2-fn -v $(pwd)/example-fn-logging/example-fn-logging/images:/example-fn-logging/images -e FSOURCE='images' image1-fn
+>>>>>>> logging-output
       
  #   - name: Copying 'edges' files
   #    run: find example-fn/example-fn/images -type f -name '*_edges*' -exec cp {} ./ \;
@@ -31,7 +51,11 @@ jobs:
     - name: Publish results
       if: ${{ steps.check_push_author.outputs.push_author != '41898282+github-actions[bot]@users.noreply.github.com' }}
       run: |
+<<<<<<< HEAD
             cd example-fn
+=======
+            cd example-fn-logging
+>>>>>>> logging-output
             ls
             git config --local user.name "$USERNAME"
             git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
