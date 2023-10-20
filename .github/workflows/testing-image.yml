@@ -1,31 +1,6 @@
 name: testing-image
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-on: 
-  push:
-    branches:
-      - main
-    paths:
-      - 'example-fn'
-    types:
-      - added
-=======
-on:
-  push:
-    branches:
-      - logging-output
-    paths:
-      - 'example-fn'
->>>>>>> logging-output
-=======
 on: [push]
-  #push:
-  #  branches:
-  #    - logging-output-optimised
-  #  paths:
-  #    - 'example-fn'
->>>>>>> example-fn-optimised
 
 jobs:
   testing-images:
@@ -40,29 +15,15 @@ jobs:
         token: ${{ secrets.PUSH_TOKEN }}
         
     - name: Create an image with Dockerfile
-      run: docker build -t image1-fn example-fn/example-fn
+      run: docker build -t image1-fn example-fn/example-fn || docker build -t image1-fn example-fn-logging/example-fn-logging || docker build -t image1-fn example-fn-optimised/example-fn-optimised
 
     - name: Using a container with the previous image and running the Python script
-      run: docker run --name contenedor2-fn -v $(pwd)/example-fn/example-fn/images:/example-fn/images -e FSOURCE='images' image1-fn
+      run: docker run --name contenedor2-fn -v $(pwd)/example-fn/example-fn/images:/example-fn/images -e FSOURCE='images' image1-fn || docker run --name contenedor2-fn -v $(pwd)/example-fn-logging/example-fn-logging/images:/example-fn-logging/images -e FSOURCE='images' image1-fn
+>>>>>>> logging-output || docker run --name contenedor2-fn -v $(pwd)/example-fn-optimised/example-fn-optimised/images:/example-fn-optimised/images -e FSOURCE='images' image1-fn
 =======
         path: example-fn-logging
-        token: ${{ secrets.PUSH_TOKEN }}
-        
-    - name: Create an image with Dockerfile
-      run: docker build -t image1-fn example-fn-logging/example-fn-logging
-
-    - name: Using a container with the previous image and running the Python script
-      run: docker run --name contenedor2-fn -v $(pwd)/example-fn-logging/example-fn-logging/images:/example-fn-logging/images -e FSOURCE='images' image1-fn
->>>>>>> logging-output
 =======
         path: example-fn-optimised
-        token: ${{ secrets.PUSH_TOKEN }}
-        
-    - name: Create an image with Dockerfile
-      run: docker build -t image1-fn example-fn-optimised/example-fn-optimised
-
-    - name: Using a container with the previous image and running the Python script
-      run: docker run --name contenedor2-fn -v $(pwd)/example-fn-optimised/example-fn-optimised/images:/example-fn-optimised/images -e FSOURCE='images' image1-fn
 >>>>>>> example-fn-optimised
       
  #   - name: Copying 'edges' files
@@ -71,15 +32,7 @@ jobs:
     - name: Publish results
       if: ${{ steps.check_push_author.outputs.push_author != '41898282+github-actions[bot]@users.noreply.github.com' }}
       run: |
-<<<<<<< HEAD
-<<<<<<< HEAD
-            cd example-fn
-=======
-            cd example-fn-logging
->>>>>>> logging-output
-=======
-            cd example-fn-optimised
->>>>>>> example-fn-optimised
+            cd example-fn || cd example-fn-logging || cd example-fn-optimised
             ls
             git config --local user.name "$USERNAME"
             git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
