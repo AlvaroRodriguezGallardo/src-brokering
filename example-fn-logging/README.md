@@ -12,6 +12,8 @@ This function takes an image and it extracts the edges.
 
 The steps for a succesful execution are (two ways):
 
+Suppose you are in folder with name <folder_version>
+
 If you are within this folder:
 
 ```
@@ -21,7 +23,7 @@ docker build . -t image1-fn
 If you are on top of the this folder (one level before):
 
 ```
-docker build -t image1-fn example-fn-logging
+docker build -t image1-fn <folder_version>
 ```
 
 In this step, we create an image called `image1-fn` with a created dockerfile, and we specify the directory in wich we have the programme and the dockerfile. You must give an argument (image or folder)
