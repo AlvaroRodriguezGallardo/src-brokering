@@ -5,19 +5,19 @@
 SRC brokering for JAE Intro Scholarship
 
 ## How to run a function with Docker
-
+## Note: This is a general ReadMe.md. You should use one of the folders. Name a folder <folder_version>. In each folder, there is an example with that folder name. This is a generalitation.
 Some functions
 
 I have used Docker Desktop aplication. The steps for a succesful execution are:
 
 ```
-docker build -t image1-fn example-fn
+docker build -t image1-fn <folder_version>
 ```
 
 In this step, we create an image called `image1-fn` with a created dockerfile, and we specify the directory in wich we have the programme and the dockerfile.
 
 ```
-docker run --name contenedor2-fn -v $(pwd)/example-fn/images:/example-fn/images -e FSOURCE='images' image1-fn
+docker run --name contenedor2-fn -v $(pwd)/<folder_version>/images:/<folder_version>/images -e FSOURCE='images' image1-fn
 ```
 
 We create a conainer called `contenedor2-fn`, and path for mounting the `images` directory is specified. Consequently, result will be in that directory. We write the image we want in te container too.
