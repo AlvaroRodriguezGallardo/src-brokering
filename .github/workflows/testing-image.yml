@@ -9,22 +9,16 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
       with:
-<<<<<<< HEAD
-<<<<<<< HEAD
-        path: example-fn
+    #    path: example-fn
+        path: example-fn-logging
+   #     path: example-fn-optimised
         token: ${{ secrets.PUSH_TOKEN }}
         
     - name: Create an image with Dockerfile
       run: docker build -t image1-fn example-fn/example-fn || docker build -t image1-fn example-fn-logging/example-fn-logging || docker build -t image1-fn example-fn-optimised/example-fn-optimised
 
     - name: Using a container with the previous image and running the Python script
-      run: docker run --name contenedor2-fn -v $(pwd)/example-fn/example-fn/images:/example-fn/images -e FSOURCE='images' image1-fn || docker run --name contenedor2-fn -v $(pwd)/example-fn-logging/example-fn-logging/images:/example-fn-logging/images -e FSOURCE='images' image1-fn
->>>>>>> logging-output || docker run --name contenedor2-fn -v $(pwd)/example-fn-optimised/example-fn-optimised/images:/example-fn-optimised/images -e FSOURCE='images' image1-fn
-=======
-        path: example-fn-logging
-=======
-        path: example-fn-optimised
->>>>>>> example-fn-optimised
+      run: docker run --name contenedor2-fn -v $(pwd)/example-fn/example-fn/images:/example-fn/images -e FSOURCE='images' image1-fn || docker run --name contenedor2-fn -v $(pwd)/example-fn-logging/example-fn-logging/images:/example-fn-logging/images -e FSOURCE='images' image1-fn || docker run --name contenedor2-fn -v $(pwd)/example-fn-optimised/example-fn-optimised/images:/example-fn-optimised/images -e FSOURCE='images' image1-fn
       
  #   - name: Copying 'edges' files
   #    run: find example-fn/example-fn/images -type f -name '*_edges*' -exec cp {} ./ \;
