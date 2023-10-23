@@ -4,9 +4,9 @@ name: testing-image
 on:
   push:
     branches:
-      -'main'
+      -main
     paths:
-      - 'example-fn-optimised'
+      - 'example-fn-optimised/**'
 
 jobs:
   testing-images:
