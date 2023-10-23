@@ -6,7 +6,7 @@ on:
     branches:
       -main
     paths:
-      - 'example-fn-optimised/**'
+      - example-fn-optimised/**
 
 jobs:
   testing-images:
