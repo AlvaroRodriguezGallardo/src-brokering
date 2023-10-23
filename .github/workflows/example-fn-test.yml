@@ -1,6 +1,9 @@
 name: testing-image
 
-on: [push]
+on:
+  push:
+    paths:
+      -'example-fn'
 
 jobs:
   testing-images:
