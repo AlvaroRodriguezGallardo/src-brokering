@@ -5,7 +5,7 @@ on:
     branches:
       -'main'
     paths:
-      -'example-fn-logging'
+      -'example-fn-logging/**'
 
 jobs:
   testing-images:
