@@ -1,4 +1,4 @@
-name: testing-image
+name: testing-image-example-fn-logging
 
 on: 
   push:
