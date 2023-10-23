@@ -1,5 +1,4 @@
-
-name: testing-image
+name: testing-image-example-fn-optimised
 
 on:
   push:
