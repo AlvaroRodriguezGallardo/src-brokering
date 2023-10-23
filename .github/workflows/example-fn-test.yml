@@ -3,9 +3,9 @@ name: testing-image
 on:
   push:
     branches:
-      - 'main/**'
+      - main
     paths:
-      - 'example-fn/**'
+      - example-fn/**
 
 jobs:
   testing-images:
