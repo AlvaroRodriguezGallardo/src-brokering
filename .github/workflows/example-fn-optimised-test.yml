@@ -1,7 +1,10 @@
 
 name: testing-image
 
-on: [push]
+on:
+  push:
+    paths:
+      - 'example-fn-optimised'
 
 jobs:
   testing-images:
