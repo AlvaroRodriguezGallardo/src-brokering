@@ -12,10 +12,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:  
     - name: Checkout
-      uses: actions/checkout@v2  # Utiliza la versión 2 del action checkout
+      uses: actions/checkout@v2
       with:
         path: example-fn
-        ref: main
         token: ${{ secrets.PUSH_TOKEN }}
         
     - name: Create an image with Dockerfile
