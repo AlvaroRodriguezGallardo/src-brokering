@@ -3,6 +3,8 @@ name: testing-image
 
 on:
   push:
+    branches:
+      -'main'
     paths:
       - 'example-fn-optimised'
 
