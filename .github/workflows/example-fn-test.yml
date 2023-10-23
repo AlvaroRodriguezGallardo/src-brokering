@@ -1,4 +1,4 @@
-name: testing-image
+name: testing-image-simple-example-fn
 
 on:
   push:
