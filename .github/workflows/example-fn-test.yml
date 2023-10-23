@@ -3,9 +3,9 @@ name: testing-image
 on:
   push:
     branches:
-      -main
+      - main
     paths:
-      -example-fn/**
+      - example-fn/**
 
 jobs:
   testing-images:
@@ -23,19 +23,16 @@ jobs:
     - name: Using a container with the previous image and running the Python script
       run: docker run --name contenedor2-fn -v $(pwd)/example-fn/example-fn/images:/example-fn/images -e FSOURCE='images' image1-fn
       
- #   - name: Copying 'edges' files
-  #    run: find example-fn/example-fn/images -type f -name '*_edges*' -exec cp {} ./ \;
-      
     - name: Publish results
-      if: ${{ steps.check_push_author.outputs.push_author != '41898282+github-actions[bot]@users.noreply.github.com' }}
+      if: ${{ steps.check_push_author.outputs.push_author != 'github-actions[bot]@users.noreply.github.com' }}
       run: |
-            cd example-fn
-            ls
-            git config --local user.name "$USERNAME"
-            git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add -A
-            git commit -m "Python results"
-            git push https://$USERNAME:$REPO_KEY@github.com/AlvaroRodriguezGallardo/src-brokering.git
+        cd example-fn
+        ls
+        git config --local user.name "$USERNAME"
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git add -A
+        git commit -m "Python results"
+        git push https://$USERNAME:$REPO_KEY@github.com/AlvaroRodriguezGallardo/src-brokering.git
       env:
-            REPO_KEY: ${{ secrets.PUSH_TOKEN }}
-            USERNAME: github-actions[bot]
+        REPO_KEY: ${{ secrets.PUSH_TOKEN }}
+        USERNAME: github-actions[bot]
