@@ -9,8 +9,8 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
       with:
-    #    path: example-fn
         path: example-fn-logging
+    #    path: example-fn
    #     path: example-fn-optimised
         token: ${{ secrets.PUSH_TOKEN }}
         
