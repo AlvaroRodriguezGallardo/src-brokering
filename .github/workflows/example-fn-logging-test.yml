@@ -1,11 +1,6 @@
 name: testing-image
 
-on:
-  push:
-    branches:
-      - logging-output
-    paths:
-      - 'example-fn'
+on: [push]
 
 jobs:
   testing-images:
