@@ -5,7 +5,7 @@
 SRC brokering for JAE Intro Scholarship
 
 ## How to run a function with Docker
-## Note: This is a general ReadMe.md. You should use one of the folders. Name a folder <folder_version>. In each folder, there is an example with that folder name. This is a generalitation.
+### Note: This is a general ReadMe.md. You should use one of the folders. Name a folder <folder_version>. In each folder, there is an example with that folder name. This is a generalitation.
 Some functions
 
 I have used Docker Desktop aplication. The steps for a succesful execution are:
