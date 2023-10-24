@@ -12,9 +12,9 @@ You can use OSCAR in different ways: locally (you have to use the four apps ment
 ```git clone https://github.com/grycap/oscar.git```
 ```cd oscar/deploy/ansible```
 
-2- SSH configuration: Using ``vi /.ssh/config``, write
-```
-Host front_
+2- SSH configuration: Using ``vi /.ssh/config``, write:
+
+```Host front_```
   HostName <PUBLIC_IP>
   User ubuntu
   IdentityFile ~/.ssh/my_private_key
