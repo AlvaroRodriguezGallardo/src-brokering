@@ -10,7 +10,7 @@ You can use OSCAR in different ways: locally (you have to use the four apps ment
 
 1- Clone the repository and move into ansible folder:
 ```git clone https://github.com/grycap/oscar.git```
-```cd oscar/deploy/ansible```
+cd oscar/deploy/ansible```
 
 2- SSH configuration: Using ``vi /.ssh/config``, write:
 
