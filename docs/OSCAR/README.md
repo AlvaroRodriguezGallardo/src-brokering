@@ -40,7 +40,7 @@ Host wn3
 In this example, a host uses a public IP for making a proxy service with SSH, and the rest of nodes work internally (like master-slave paradigm I guess).
 
 3- Edit 'hosts' file, using the next scheme:
-``
+```
 [front]
 front_
 
@@ -48,11 +48,11 @@ front_
 wn1
 wn2
 wn3
-``
+```
 In [front] we write the only node who is going to make a proxy service, and in [wn] we write the rest of nodes.
 
 4- Set up some variables. In ``vars.yaml``, write:
-``
+```
 ---
 kube_version: v1.22.3+k3s1
 kube_admin_token: kube-token123
@@ -61,11 +61,11 @@ dns_host: oscar-cluster.example.com
 minio_password: Alvarominio1.
 minio_dns_host: minio.oscar-cluster.example.com
 minio_dns_host_console: minio-console.oscar-cluster.example.com
-``
+```
 
 5- Run next command:
-``ansible-galaxy install -r install_roles.yaml --force``
+```ansible-galaxy install -r install_roles.yaml --force```
 
 6- Run the playbook:
-``ansible-playbook -i hosts oscar-k3s.yaml``
+```ansible-playbook -i hosts oscar-k3s.yaml```
 with the previous command, we run the playbook for OSCAR, using nodes specificated in ``hosts`` file
