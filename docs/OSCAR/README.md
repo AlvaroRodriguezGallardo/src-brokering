@@ -14,7 +14,7 @@ You can use OSCAR in different ways: locally (you have to use the four apps ment
 
 2- SSH configuration: Using ``vi /.ssh/config``, write:
 
-```Host front_```
+```Host front_
   HostName <PUBLIC_IP>
   User ubuntu
   IdentityFile ~/.ssh/my_private_key
