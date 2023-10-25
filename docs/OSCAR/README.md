@@ -42,7 +42,7 @@ Host wn3
   IdentityFile ~/.ssh/my_private_key
   ProxyJump front
 ```
-In this example, a host uses a public IP for making a proxy service with SSH, and the rest of nodes work internally (like master-slave paradigm I guess). In <PUBLIC_KEY> write the external server IP (OSCAR) and in <PRIVATE_KEY> an IP of my local network.
+In this example, a host uses a public IP for making a proxy service with SSH, and the rest of nodes work internally (like master-slave paradigm I guess). In <PUBLIC_KEY> write the external server IP (OSCAR) and in <PRIVATE_KEY> an IP of my local network. Learning about it, I only have one node with a local IP (``ip a``), so I have two hosts with the same IP: front and wn1.
 
 3- Edit 'hosts' file, using the next scheme:
 ```
