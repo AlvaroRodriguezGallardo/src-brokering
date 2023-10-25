@@ -1,4 +1,4 @@
-Learning and discussions about OSCAR
+# Learning and discussions about OSCAR
 
 ## What is Oscar?
 
@@ -6,7 +6,7 @@ Oscar is a serverless platform developed by GryCap group (https://github.com/gry
 
 You can use OSCAR in different ways: locally (you have to use the four apps mentioned), with IM Dashboard, with EC3, with Helm and on K3s with Ansible. I try the last one
 
-# Instalation. Deployment on K3s with Ansible
+## Instalation. Deployment on K3s with Ansible
 
 1- Clone the repository and move into ansible folder:
 ```git clone https://github.com/grycap/oscar.git```
