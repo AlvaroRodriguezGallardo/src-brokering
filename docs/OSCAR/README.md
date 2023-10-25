@@ -17,7 +17,7 @@ cd oscar/deploy/ansible
 2- SSH configuration: Using ``nano /.ssh/config``, write:
 
 ```
-Host front_
+Host front
   HostName <PUBLIC_IP>
   User ubuntu
   IdentityFile ~/.ssh/my_private_key
@@ -45,7 +45,7 @@ In this example, a host uses a public IP for making a proxy service with SSH, an
 3- Edit 'hosts' file, using the next scheme:
 ```
 [front]
-front_
+front
 
 [wn]
 wn1
