@@ -9,10 +9,12 @@ You can use OSCAR in different ways: locally (you have to use the four apps ment
 ## Instalation. Deployment on K3s with Ansible
 
 1- Clone the repository and move into ansible folder:
-```git clone https://github.com/grycap/oscar.git```
-```cd oscar/deploy/ansible```
+```
+git clone https://github.com/grycap/oscar.git
+cd oscar/deploy/ansible
+```
 
-2- SSH configuration: Using ``vi /.ssh/config``, write:
+2- SSH configuration: Using ``nano /.ssh/config``, write:
 
 ```
 Host front_
@@ -38,7 +40,7 @@ Host wn3
   IdentityFile ~/.ssh/my_private_key
   ProxyJump front
 ```
-In this example, a host uses a public IP for making a proxy service with SSH, and the rest of nodes work internally (like master-slave paradigm I guess).
+In this example, a host uses a public IP for making a proxy service with SSH, and the rest of nodes work internally (like master-slave paradigm I guess). In <PUBLIC_KEY> write the external server IP (OSCAR) and in <PRIVATE_KEY> an IP of my local network.
 
 3- Edit 'hosts' file, using the next scheme:
 ```
