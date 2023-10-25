@@ -8,6 +8,8 @@ You can use OSCAR in different ways: locally (you have to use the four apps ment
 
 ## Instalation. Deployment on K3s with Ansible
 
+We can configure OSCAR with other IoT computers or virtual machines if we follow this steps
+
 1- Clone the repository and move into ansible folder:
 ```
 git clone https://github.com/grycap/oscar.git
