@@ -16,7 +16,7 @@ git clone https://github.com/grycap/oscar.git
 cd oscar/deploy/ansible
 ```
 
-2- SSH configuration: Using ``nano /.ssh/config``, write:
+2- SSH configuration: Using ``nano ~/.ssh/config``, write:
 
 ```
 Host front
