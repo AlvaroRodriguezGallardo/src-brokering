@@ -20,26 +20,14 @@ cd oscar/deploy/ansible
 
 ```
 Host front
-  HostName <PUBLIC_IP>
+  HostName 10.42.1.215    
   User ubuntu
   IdentityFile ~/.ssh/my_private_key
 
 Host wn1
-  HostName <PRIVATE_IP>
+  Hostname 10.42.1.215
   User ubuntu
-  IdentityFile ~/.ssh/my_private_key
-  ProxyJump front
-
-Host wn2
-  HostName <PRIVATE_IP>
-  User ubuntu
-  IdentityFile ~/.ssh/my_private_key
-  ProxyJump front
-
-Host wn3
-  HostName <PRIVATE_IP>
-  User ubuntu
-  IdentityFile ~/.ssh/my_private_key
+  IdentifyFile ~/.ssh/my_private_key
   ProxyJump front
 ```
 In this example, a host uses a public IP for making a proxy service with SSH, and the rest of nodes work internally (like master-slave paradigm I guess). In <PUBLIC_KEY> write the external server IP (OSCAR) and in <PRIVATE_KEY> an IP of my local network. Learning about it, I only have one node with a local IP (``ip a``), so I have two hosts with the same IP: front and wn1.
@@ -51,8 +39,6 @@ front
 
 [wn]
 wn1
-wn2
-wn3
 ```
 In [front] we write the only node who is going to make a proxy service, and in [wn] we write the rest of nodes.
 
