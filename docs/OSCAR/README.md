@@ -60,3 +60,31 @@ minio_dns_host_console: minio-console.oscar-cluster.example.com
 6- Run the playbook:
 ```ansible-playbook -i hosts oscar-k3s.yaml```
 with the previous command, we run the playbook for OSCAR, using nodes specificated in ``hosts`` file
+
+## Instalation. Deployment on Helm
+Firstly, you must install [k9s](https://github.com/derailed/k9s), [KIND](https://kind.sigs.k8s.io/) (you need Docker previously installed), [kubectl](https://kubernetes.io/es/docs/tasks/tools/)
+
+When you run command ``kubectl get pods -A``, it returns the following 
+``
+NAMESPACE            NAME                                         READY   STATUS    RESTARTS   AGE
+kube-system          coredns-558bd4d5db-4j4wq                     1/1     Running   0          76s
+kube-system          coredns-558bd4d5db-tdrd7                     1/1     Running   0          76s
+kube-system          etcd-kind-control-plane                      1/1     Running   0          80s
+kube-system          kindnet-ddrcw                                1/1     Running   0          64s
+kube-system          kindnet-nwcj2                                1/1     Running   0          77s
+kube-system          kindnet-xlzqz                                1/1     Running   0          64s
+kube-system          kube-apiserver-kind-control-plane            1/1     Running   0          80s
+kube-system          kube-controller-manager-kind-control-plane   1/1     Running   0          80s
+kube-system          kube-proxy-29dll                             1/1     Running   0          77s
+kube-system          kube-proxy-j7vb4                             1/1     Running   0          64s
+kube-system          kube-proxy-wvtgw                             1/1     Running   0          64s
+kube-system          kube-scheduler-kind-control-plane            1/1     Running   0          80s
+local-path-storage   local-path-provisioner-547f784dff-hxmnt      1/1     Running   0          76s
+``
+and ``kind get nodes`` returns
+``
+kind-control-plane
+kind-worker2
+kind-worker
+``
+as you set up in ``oscar.yaml``
