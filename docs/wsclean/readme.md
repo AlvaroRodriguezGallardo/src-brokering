@@ -10,3 +10,10 @@ cmake ../
 make -j 4
 sudo make install
 ```
+## Running commands:
+You can follow [this steps](https://wsclean.readthedocs.io/en/latest/usage.html) for simple examples. You need get some .ms files for a succesful run. With ``wsclean --help` you can look for a wide amount of flags.
+
+### Examples:
+
+- ``wsclean -size 3072 3072 -scale 0.7amin -niter 10000 -mgain 0.8 -auto-threshold 3 obs.ms``: It runs the Cotton-Schwab algorithm, with the following parameters: ``-size`` returns an image with the specificated size, ``-mgain`` indicates the percentage the peak flux is reduced, ``-niter`` is the maximum iterations done by the algorithm, ``-auto-threshold`` stimate noise level with a given typical desviaton, and ``-scale``, indicates the scale of a pixel.
+- ``wsclean -size 3072 3072 -scale 0.7amin -niter 10000 -auto-threshold 3 -padding 1 obs.ms``: Here, ``-padding`` is factor with which you pad the image.
