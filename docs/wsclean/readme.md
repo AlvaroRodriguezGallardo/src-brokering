@@ -11,7 +11,7 @@ make -j 4
 sudo make install
 ```
 ## Running commands:
-You can follow [this steps](https://wsclean.readthedocs.io/en/latest/usage.html) for simple examples. You need get some .ms files for a succesful run. With ``wsclean --help` you can look for a wide amount of flags.
+You can follow [this steps](https://wsclean.readthedocs.io/en/latest/usage.html) for simple examples. You need get some .ms files for a succesful run. With ``wsclean --help`` you can look for a wide amount of flags.
 
 ### Examples:
 
