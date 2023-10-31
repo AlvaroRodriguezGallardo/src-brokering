@@ -44,3 +44,7 @@ Most of examples can be exposed. However, as in documentation appears, it may be
 |                  | -weighting-rank-filter <_level_> | Filter the weights and set up them if they are higher than <_level_>*local mean        |
 |                  | -taper-gaussian <_beamsize_> | Calculate weights using the gaussian function (good properties, like symmetry)        |
 |                  | -taper-edge <_lambda_> | Calculate weights using a distance of <_lambda_> as difference between edges and gridded visibilities        |
+|                   |  -store-imaging-weights | Save used weights in a column called ``IMAGING_WEIGHT_SPECTRUM``|
+| Inversion options     | -size <_width_> <_height_> | Size of the output image         |
+|                   |  -padding <_factor_> |  Pad images by the given factor during inversion to avoid aliasing |
+
