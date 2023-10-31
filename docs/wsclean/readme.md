@@ -24,7 +24,7 @@ Most of examples can be exposed. However, as in documentation appears, it may be
 
 | Category        | Flag              | Explanation                                  |
 |------------------|---------------------|---------------------------------------------|
-| CGeneral operations     | -j <threads> | Run a program in parallel with the indicated threads          |
+| General operations     | -j <_threads_> | Run a program in parallel with the indicated threads          |
 |                  | -no-work-on-master |  Computación distribuida (MPI). It does not use the master thread. Helpful if resources are limited         |
 |                  | -mem <percentage> | Limits how many memory can be used in %          |
 |                 | -abs-mem <memory_limit> | The same as '-mem' but in GB          |
@@ -37,3 +37,4 @@ Most of examples can be exposed. However, as in documentation appears, it may be
 |                  | --use-differential-lofar-beam | Visibilities must have been corrected with the beam. It determines if we can obtein some flux levels          |
 |                  | -mwa-path <path> | Where MWA files can be found          |
 |                  | -primary-beam-model | Specifies the beam model. Relevant for SKA         |
+| Weighting options     | -j <_threads_> | Run a program in parallel with the indicated threads          |
