@@ -70,4 +70,6 @@ kind-control-plane
 kind-worker2
 kind-worker
 ``
-as you set up in ``oscar.yaml``
+as you set up in ``oscar.yaml``.
+
+**MinIO is displayed in a different module where Kubernetes works**. [Following this steps](https://min.io/docs/minio/linux/index.html), you can acces to MinIO interface with this [URL](http://10.42.0.191:9090), previously running the command `` minio server ~/minio --console-address :9090``
