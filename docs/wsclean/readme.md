@@ -37,4 +37,10 @@ Most of examples can be exposed. However, as in documentation appears, it may be
 |                  | --use-differential-lofar-beam | Visibilities must have been corrected with the beam. It determines if we can obtein some flux levels          |
 |                  | -mwa-path <path> | Where MWA files can be found          |
 |                  | -primary-beam-model | Specifies the beam model. Relevant for SKA         |
-| Weighting options     | -j <_threads_> | Run a program in parallel with the indicated threads          |
+| Weighting options     | -weight <_weightmode_> |  It indicates the way weights are obtained:natural,uniform or briggs. If briggs is selected, add robustness parameter         |
+|                  | -super-weight <-factor_>| Increase the weight gridding box size. Default: 1.0         |
+|                  | -mf-weighting| In spectral mode, calculate the weights as if the image was made using MF. Useful for uniform or brigg modes         |
+|                  | -no-mf-weighting| It disables the previous flag        |
+|                  | -weighting-rank-filter <_level_> | Filter the weights and set up them if they are higher than <_level_>*local mean        |
+|                  | -taper-gaussian <_beamsize_> | Calculate weights using the gaussian function (good properties, like symmetry)        |
+|                  | -taper-edge <_lambda_> | Calculate weights using a distance of <_lambda_> as difference between edges and gridded visibilities        |
