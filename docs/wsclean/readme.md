@@ -47,4 +47,14 @@ Most of examples can be exposed. However, as in documentation appears, it may be
 |                   |  -store-imaging-weights | Save used weights in a column called ``IMAGING_WEIGHT_SPECTRUM``|
 | Inversion options     | -size <_width_> <_height_> | Size of the output image         |
 |                   |  -padding <_factor_> |  Pad images by the given factor during inversion to avoid aliasing |
-
+|                   |  -scale <pixel-scale> |  Scale for a pixel |
+|                   |  -prediction |  Make a prediction for an image given |
+|                    | -shift <ra> <dec> | Change the phase centre to another in the tangential plane|
+|                  |  -nwlayers <nwlayers> | It indicates the number of w-layers |
+|                  |  -grid-mode <"nn", "kb" or "rect"> | Kernel and mode used for gridding: kb = Kaiser-Bessel (default with 7 pixels), nn = nearest neighbour (no kernel) |
+|                  |  -kernel-size <size>  | Size of the kernel. Default 7. Remember a kernel is a matrix with size nxn |
+|                  |  -visibility-weighting-mode [normal/squared/unit] | Specify visibility weighting modi. Affects how the weights (normally) stored in ``WEIGHT_SPECTRUM`` column are applied. Useful for estimating errors |
+|                  | -simulate-noise <_stddev-in-jy_> | Replaces every visibility with a gaussian value with standard desviation given |
+|                  | -simulate-baseline-noise <_filename_> | The same as the previous flag, but the standard desviation is given within a file |
+|                  | -idg-mode [cpu/gpu/hybrid]             | Set the IDG mode |
+|                  |  -use-wgridder    |   Use the w-gridding gridder developed by Martin Reinecke |
