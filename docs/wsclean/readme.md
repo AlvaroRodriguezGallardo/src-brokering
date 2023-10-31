@@ -58,3 +58,8 @@ Most of examples can be exposed. However, as in documentation appears, it may be
 |                  | -simulate-baseline-noise <_filename_> | The same as the previous flag, but the standard desviation is given within a file |
 |                  | -idg-mode [cpu/gpu/hybrid]             | Set the IDG mode |
 |                  |  -use-wgridder    |   Use the w-gridding gridder developed by Martin Reinecke |
+| A-Term gridding     | -aterm-config <_filename_> | Set properties of a-aterm, giving the documentation needed|
+|                  |  -grid-with-beam  |  Apply a-terms to correct for the primary beam. This is only possible when IDG is enabled  |
+|                  |  -aterm-kernel-size <_double_>  |  Kernel size reserved for aterms by IDG |
+|                  |  -apply-facet-solutions <path-to-file> <name1[,name2,...nameN]> | Apply solutions from the provided (h5 format) file per facet when gridding facet based images |
+|                  |  -save-aterms  | Save a file for every aterm update |
