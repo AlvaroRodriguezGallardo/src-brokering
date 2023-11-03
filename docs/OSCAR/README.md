@@ -106,4 +106,4 @@ Age depends on how much time has passed since you created oscar cluster.
 
 NFS has been configured with files in this [repository](https://github.com/kubernetes-sigs/nfs-ganesha-server-and-external-provisioner), using NFS Ganesha Server and an external provisioner. A tutorial to configure is [this](https://cloudyuga.guru/hands_on_lab/nfs-kind). In this [URL](https://github.com/kubernetes-sigs/nfs-ganesha-server-and-external-provisioner/blob/master/charts/nfs-server-provisioner/README.md) You can find steps for deploying NFS using Chart. Here you have steps:
 - 1- ``helm repo add nfs-ganesha-server-and-external-provisioner https://kubernetes-sigs.github.io/nfs-ganesha-server-and-external-provisioner/``
-- 2- helm install nfs-server-provisioner nfs-ganesha-server-and-external-provisioner/nfs-server-provisioner
+- 2- ``helm install nfs-server-provisioner nfs-ganesha-server-and-external-provisioner/nfs-server-provisioner``
