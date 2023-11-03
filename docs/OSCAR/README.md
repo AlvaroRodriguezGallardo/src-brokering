@@ -104,4 +104,4 @@ Age depends on how much time has passed since you created oscar cluster.
 - If evertything has gone well, you should be able to run ``kubectl get storageClass`` and ``kubectl -n local-path-storage logs -f -l app=local-path-provisioner``. It may work.
 - Lastly, install MinIO. **MinIO is displayed in a different module where Kubernetes works**. [Following this steps](https://min.io/docs/minio/linux/index.html), you can acces to MinIO interface with this [URL](http://10.42.0.191:9090), previously running the command `` minio server ~/minio --console-address :9090``
 
-NFS has been configured with files in this [repository](https://github.com/kubernetes-sigs/nfs-ganesha-server-and-external-provisioner), using NFS Ganesha Server and an external provisioner. A tutorial to configure it is [this](https://cloudyuga.guru/hands_on_lab/nfs-kind).
+NFS has been configured with files in this [repository](https://github.com/kubernetes-sigs/nfs-ganesha-server-and-external-provisioner), using NFS Ganesha Server and an external provisioner. A tutorial to configure is [this](https://cloudyuga.guru/hands_on_lab/nfs-kind).
