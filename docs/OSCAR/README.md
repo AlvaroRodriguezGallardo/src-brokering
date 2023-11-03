@@ -62,14 +62,46 @@ minio_dns_host_console: minio-console.oscar-cluster.example.com
 with the previous command, we run the playbook for OSCAR, using nodes specificated in ``hosts`` file
 
 ## Instalation. Deployment on Helm
-Firstly, you must install [k9s](https://github.com/derailed/k9s), [KIND](https://kind.sigs.k8s.io/) (you need Docker previously installed), [kubectl](https://kubernetes.io/es/docs/tasks/tools/)
+You must install [k9s](https://github.com/derailed/k9s), [KIND](https://kind.sigs.k8s.io/) (you need Docker previously installed), [kubectl](https://kubernetes.io/es/docs/tasks/tools/).
 
-and ``kind get nodes`` returns
+- Firstly, create ``oscar.yaml`` and write
+
 ``
-kind-control-plane
-kind-worker2
-kind-worker
-``
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+- role: control-plane
+  kubeadmConfigPatches:
+  - |
+    kind: InitConfiguration
+    nodeRegistration:
+      kubeletExtraArgs:
+        node-labels: "ingress-ready=true"
+  extraPortMappings:
+  - containerPort: 80
+    hostPort: 80
+    protocol: TCP
+  - containerPort: 443
+    hostPort: 443
+    protocol: TCP
+- role: worker
+- role: worker
+
 as you set up in ``oscar.yaml``.
 
-**MinIO is displayed in a different module where Kubernetes works**. [Following this steps](https://min.io/docs/minio/linux/index.html), you can acces to MinIO interface with this [URL](http://10.42.0.191:9090), previously running the command `` minio server ~/minio --console-address :9090``
+- Run ``kind delete  clusters kind`` if other clusters which can make a conflict were created. Then, run ``kind create  cluster --config oscar.yaml``. With this action we have create a cluster with three nodes: a "master" node and two "workers" nodes. ´´kubectl get nodes -A`` may return
+
+| NAME                | STATUS | ROLES                 | AGE   | VERSION  |
+|---------------------|--------|-----------------------|-------|----------|
+| kind-control-plane  | Ready  | control-plane,master  | 3d5h  | v1.21.1  |
+| kind-worker         | Ready  | worker                | 3d5h  | v1.21.1  |
+| kind-worker2        | Ready  | worker                | 3d5h  | v1.21.1  |
+
+Age depends on how much time has passed since you created oscar cluster.
+
+- Then, apply Ingress-ngix: ``kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml``
+- Install a storage driver with ``kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/v0.0.24/deploy/local-path-storage.yaml``
+- If evertything has gone well, you should be able to run ``kubectl get storageClass`` and ``kubectl -n local-path-storage logs -f -l app=local-path-provisioner``. It may work.
+- Lastly, install MinIO. **MinIO is displayed in a different module where Kubernetes works**. [Following this steps](https://min.io/docs/minio/linux/index.html), you can acces to MinIO interface with this [URL](http://10.42.0.191:9090), previously running the command `` minio server ~/minio --console-address :9090``
+
+NFS has been configured with files in this [repository](https://github.com/kubernetes-sigs/nfs-ganesha-server-and-external-provisioner), using NFS Ganesha Server and an external provisioner. A tutorial to configure it is [this](https://cloudyuga.guru/hands_on_lab/nfs-kind).
