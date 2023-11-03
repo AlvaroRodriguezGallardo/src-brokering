@@ -63,4 +63,5 @@ Most of examples can be exposed. However, as in documentation appears, it may be
 |                  |  -aterm-kernel-size <_double_>  |  Kernel size reserved for aterms by IDG |
 |                  |  -apply-facet-solutions <path-to-file> <name1[,name2,...nameN]> | Apply solutions from the provided (h5 format) file per facet when gridding facet based images |
 |                  |  -save-aterms  | Save a file for every aterm update |
+
 More flags in ``wsclean --help``. **Specially interested in ``DATA SELECTION OPTIONS`` and ``DECONVOLUTION OPTIONS`` options**
