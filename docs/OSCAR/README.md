@@ -67,7 +67,7 @@ You must install [k9s](https://github.com/derailed/k9s), [KIND](https://kind.sig
 - Firstly, create ``oscar.yaml`` and write
 
 ``
-kind: Cluster
+- kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
 nodes:
  role: control-plane
