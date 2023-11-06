@@ -86,7 +86,7 @@ nodes:
     protocol: TCP
 - role: worker
 - role: worker
-
+``
 as you set up in ``oscar.yaml``.
 
 - Run ``kind delete  clusters kind`` if other clusters which can make a conflict were created. Then, run ``kind create  cluster --config oscar.yaml``. With this action we have create a cluster with three nodes: a "master" node and two "workers" nodes. ´´kubectl get nodes -A`` may return
