@@ -70,24 +70,24 @@ You must install [k9s](https://github.com/derailed/k9s), [KIND](https://kind.sig
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
 nodes:
-- role: control-plane
+ role: control-plane
   kubeadmConfigPatches:
-  - |
+   |
     kind: InitConfiguration
     nodeRegistration:
       kubeletExtraArgs:
         node-labels: "ingress-ready=true"
   extraPortMappings:
-  - containerPort: 80
+   containerPort: 80
     hostPort: 80
     protocol: TCP
-  - containerPort: 443
+   containerPort: 443
     hostPort: 443
     protocol: TCP
-- role: worker
-- role: worker
+ role: worker
+ role: worker
 ``
-as you set up in ``oscar.yaml``.
+as you set up in ``oscar.yaml``. Markdown style interprets '-' and removes it from the code, so you must write it with 'role' and 'containerPort'.
 
 - Run ``kind delete  clusters kind`` if other clusters which can make a conflict were created. Then, run ``kind create  cluster --config oscar.yaml``. With this action we have create a cluster with three nodes: a "master" node and two "workers" nodes. ´´kubectl get nodes -A`` may return
 
