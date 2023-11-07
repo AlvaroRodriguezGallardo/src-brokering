@@ -66,7 +66,7 @@ You must install [k9s](https://github.com/derailed/k9s), [KIND](https://kind.sig
 
 - Firstly, create ``oscar.yaml`` and write
 
-``
+```
 kind: Cluster
 
 apiVersion: kind.x-k8s.io/v1alpha4
@@ -103,7 +103,7 @@ nodes:
  role: worker
  
  role: worker
-``
+```
 as you set up in ``oscar.yaml``. Markdown style interprets '-' and removes it from the code, so you must write it with 'role' and 'containerPort'.
 
 - Run ``kind delete  clusters kind`` if other clusters which can make a conflict were created. Then, run ``kind create  cluster --config oscar.yaml``. With this action we have create a cluster with three nodes: a "master" node and two "workers" nodes. ´´kubectl get nodes -A`` may return
