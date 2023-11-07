@@ -66,6 +66,19 @@ Most of examples can be exposed. However, as in documentation appears, it may be
 
 More flags in ``wsclean --help``. **Specially interested in ``DATA SELECTION OPTIONS`` and ``DECONVOLUTION OPTIONS`` options**
 
+During my learning process of wsclean, I have learned about the most important flags:
+
+- size <tamX> <tamY>: we specify the size of outputs images.
+- scale <angle>: Specifies the angle seen by our eye between the bottom of a single pixel and the top of the same pixel.
+- niter <iters>: Stopped criteria. However, it is advisable to use the next flag for a real stopped criteria (this is for not having an eternal loop).
+- auto-threshold <sigma>: When the peak flux arrives to 3*<sigma>, it stops.
+- mgain <percent>: It reduces flux in a <percent> in each iteration.
+- predict: Generally, it relates a image given with our dataset. It does not make a prediction with the correct frecuency, so you must be careful. [More information](https://wsclean.readthedocs.io/en/latest/prediction.html)
+- weight <mode>: You specify how to get weightings. By default, there is established ``-weight uniform``.
+- gaussian-taper <beamsize>: Multiplies all weights using a gaussian function (good properties) and makes an approach to the beam using gaussiana function with <beamsize>.
+- taper-tukey / taper-inner-tukey / taper-edge-tukey: Uses tukey transition.
+-  
+
 ### Conclusions
 Summarizing all I wrote before, wsclean is a library used in Radio Astronomy, lika CASA, in which we can clean images (previously calibrated). In the next lines, I will try to relate it with the next step of the scholarship.
 
