@@ -68,14 +68,14 @@ More flags in ``wsclean --help``. **Specially interested in ``DATA SELECTION OPT
 
 During my learning process of wsclean, I have learned about the most important flags:
 
-- size <tamX> <tamY>: we specify the size of outputs images.
-- scale <angle>: Specifies the angle seen by our eye between the bottom of a single pixel and the top of the same pixel.
-- niter <iters>: Stopped criteria. However, it is advisable to use the next flag for a real stopped criteria (this is for not having an eternal loop).
-- auto-threshold <sigma>: When the peak flux arrives to 3*<sigma>, it stops.
-- mgain <percent>: It reduces flux in a <percent> in each iteration.
+- size <_tamX_> <_tamY_>: we specify the size of outputs images.
+- scale <_angle_>: Specifies the angle seen by our eye between the bottom of a single pixel and the top of the same pixel.
+- niter <_iters_>: Stopped criteria. However, it is advisable to use the next flag for a real stopped criteria (this is for not having an eternal loop).
+- auto-threshold <_sigma_>: When the peak flux arrives to 3*<_sigma_>, it stops.
+- mgain <_percent_>: It reduces flux in a <percent> in each iteration.
 - predict: Generally, it relates a image given with our dataset. It does not make a prediction with the correct frecuency, so you must be careful. [More information](https://wsclean.readthedocs.io/en/latest/prediction.html)
-- weight <mode>: You specify how to get weightings. By default, there is established ``-weight uniform``.
-- gaussian-taper <beamsize>: Multiplies all weights using a gaussian function (good properties) and makes an approach to the beam using gaussiana function with <beamsize>.
+- weight <_mode_>: You specify how to get weightings. By default, there is established ``-weight uniform``.
+- gaussian-taper <_beamsize_>: Multiplies all weights using a gaussian function (good properties) and makes an approach to the beam using gaussiana function with <_beamsize_>.
 - taper-tukey / taper-inner-tukey / taper-edge-tukey: Uses tukey transition.
 -  
 
