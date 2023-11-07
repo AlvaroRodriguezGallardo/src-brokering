@@ -65,3 +65,10 @@ Most of examples can be exposed. However, as in documentation appears, it may be
 |                  |  -save-aterms  | Save a file for every aterm update |
 
 More flags in ``wsclean --help``. **Specially interested in ``DATA SELECTION OPTIONS`` and ``DECONVOLUTION OPTIONS`` options**
+
+### Conclusions
+Summarizing all I wrote before, wsclean is a library used in Radio Astronomy, lika CASA, in which we can clean images (previously calibrated). In the next lines, I will try to relate it with the next step of the scholarship.
+
+Firstly, we have to design and develop a wide range of wsclean versions: normal wsclean, distributed wsclean, wsclean with GPU, optimised wsclean,..., using a serverless platform like [OSCAR](https://oscar.grycap.net/). Imagine you want to use this software, then you run a command with a flag ``--version`` for example, where you specify which module you want to run. Developing must be optimised by the fact that this software must process a large amount of data (Terabytes, or more).
+
+After knowing that our software system is already, and it is tested enough, we should introduce a broker, which has two objectives: first it has to interpret command introduced by user (or what a hypothetical workflow wants), actions like cleaning the image, convolutionate an image,... Then, it must know about our software system and make some decisions (we are in a classification problem). Depending what is being executed, free resources,..., it will send that dataset to being processed in a module in which time, or even resources, are optimised. It is proposed to use machine learning algorithms, but I have to think what is the best algorithm for an optimal decision: decision trees, regression models, deep neural networks,...
