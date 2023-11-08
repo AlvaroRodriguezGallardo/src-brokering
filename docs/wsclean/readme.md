@@ -74,11 +74,20 @@ During my learning process of wsclean, I have learned about the most important f
 - auto-threshold <_sigma_>: When the peak flux arrives to 3*<_sigma_>, it stops.
 - mgain <_percent_>: It reduces flux in a <percent> in each iteration.
 - predict: Generally, it relates a image given with our dataset. It does not make a prediction with the correct frecuency, so you must be careful. [More information](https://wsclean.readthedocs.io/en/latest/prediction.html)
-- weight <_mode_>: You specify how to get weightings. By default, there is established ``-weight uniform``.
+- weight <_mode_>: You specify how to get weightings. By default, there is established ``-weight uniform``. <_mode_> = uniform / natural / briggs <roubstness>
 - gaussian-taper <_beamsize_>: Multiplies all weights using a gaussian function (good properties) and makes an approach to the beam using gaussiana function with <_beamsize_>.
 - taper-tukey / taper-inner-tukey / taper-edge-tukey: Uses tukey transition.
--  
+- join-channels <_number_>: (<_number_> > 1) Useful for making image cubes. It specifies that information should be presented with <_number_> different frecuencies. In my opinion, it generates <_number_> images for making a cube with them later. If <_number_> is less than .ms frecuencies files inputs, it groups them calculating the average of consecutive <_number_> files frecuency, with "empty intersection" between them.
+- weighting-rank-filter <_number_>: May prevent noise made by outlier weights, using <_number_> as the factor relative to the RMS above which the values are truncated.
+- baseline-averaging <_nwavelengths_>: Specifies number of wavelengths allowed to average over.
+- continue: WSClean will read the previous model and will use some .fits for generating more results.
+- reuse-psf / reuse-dirty: If a previous execution was done, it reused dirty and psf files. With this action, we do not have to make inverse again, for example.
+- use-idg.
+- idg-mode [cpu/gpu/hybrid]: It specifies where program will run. *GPU MODE IS NOT RECOMMENDED, BETTER HYBRID IF COMPUTER HAS A GPU*.
+- 
 
+For distributed executions, use ``wsclean-mp´´. However, you must use ``-join-channels`` flag, or it will not give a singe benefit.
+  
 ### Conclusions
 Summarizing all I wrote before, wsclean is a library used in Radio Astronomy, lika CASA, in which we can clean images (previously calibrated). In the next lines, I will try to relate it with the next step of the scholarship.
 
