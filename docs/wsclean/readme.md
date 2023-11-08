@@ -86,7 +86,7 @@ During my learning process of wsclean, I have learned about the most important f
 - idg-mode [cpu/gpu/hybrid]: It specifies where program will run. *GPU MODE IS NOT RECOMMENDED, BETTER HYBRID IF COMPUTER HAS A GPU*.
 - python-deconvolution <_script_>: It relates WSClean with a script programmed, but it needs to achieve this [specifications](https://wsclean.readthedocs.io/en/latest/python_deconvolution.html)
 
-For distributed executions, use ``wsclean-mp´´. However, you must use ``-join-channels`` flag, or it will not give a singe benefit.
+For distributed executions, use ``wsclean-mp´´ . However, you must use ``-join-channels`` flag, or it will not give a singe benefit.
   
 ### Conclusions
 Summarizing all I wrote before, wsclean is a library used in Radio Astronomy, lika CASA, in which we can clean images (previously calibrated). In the next lines, I will try to relate it with the next step of the scholarship.
