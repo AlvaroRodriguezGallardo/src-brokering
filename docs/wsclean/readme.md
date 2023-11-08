@@ -84,7 +84,7 @@ During my learning process of wsclean, I have learned about the most important f
 - reuse-psf / reuse-dirty: If a previous execution was done, it reused dirty and psf files. With this action, we do not have to make inverse again, for example.
 - use-idg.
 - idg-mode [cpu/gpu/hybrid]: It specifies where program will run. *GPU MODE IS NOT RECOMMENDED, BETTER HYBRID IF COMPUTER HAS A GPU*.
-- 
+- python-deconvolution <_script_>: It relates WSClean with a script programmed, but it needs to achieve this [specifications](https://wsclean.readthedocs.io/en/latest/python_deconvolution.html)
 
 For distributed executions, use ``wsclean-mp´´. However, you must use ``-join-channels`` flag, or it will not give a singe benefit.
   
