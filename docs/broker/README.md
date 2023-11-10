@@ -8,3 +8,9 @@ Supposed our system has been developed succesfully, we can have the next questio
 
 - What does the user want to?---> Broker needs to interpret the comand or order given.
 - Where should I execute this order if I want to optimise execution?--->Thanks to the last part, broker knows what the user wants, so how it knows about all system, as it was specificated before, it must face to a classification problem, and **decide** which is te best option in the way of optimising resources,time,... (optimitation problem with an scalar field $f:\Omega\subset\mathbb{R^n} \to \mathbb{R}$ ?
+
+A wide range of algorithms can be used, but I will try to specificate the most interestings ones, depending in which problem I am:
+
+### 1- What does the user want to?
+
+### 2- Where should I execute this order if I want to optimise execution?
