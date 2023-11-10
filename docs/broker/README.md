@@ -13,4 +13,9 @@ A wide range of algorithms can be used, but I will try to specificate the most i
 
 ### 1- What does the user want to?
 
+Most algorithms can be used,. However, I think the most interesting can be:
+
+- RNN (Recurrent Neuronal Networks): Inputs may not be independient from other inputs I guess, and they are good options to process natural language. However, because of their bad memory en time, LSTM (Long Short-Term Memory) and GRU (Gated Recurrent Units) should be better, both of them with satisfying results, but GRU are simpler than LSTM.
+- Transformers: Recurrency is not needed, and models like GPT uses it. It is an interesting recent algorithm (MORE)
+
 ### 2- Where should I execute this order if I want to optimise execution?
