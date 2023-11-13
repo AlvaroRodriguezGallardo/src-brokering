@@ -33,11 +33,11 @@ We can see that DNN is a very powerful algorithm for classification, but they ar
 
 Here I compare a simple neuronal network with a DNN. Each vertical group is a level. The adjective 'deep' is because in DNN we have more than one level. If we only consider a theorical point of view, we will think that more levels implies better predictions and making complex prediction, and it may be true, but empirically it needs a lot of resources, and may not be a good solution, so we have to think about level too. High level implies better predictions, but it spends a wide range of resources and it is most likely to have an overfitting. In addition, robustness may be affect, because more neurons can be attacked.
 
-On the other hand, I am going to explain more about MOEAs, in which we have the classical optimization problem with a vectorail field $F:\Omega \subset \mathbb{R^n} \to \mathbb{R^m}$, and we solve it with evolutionary algoritms (approximated algorithms, we do not know if $\exists \mathbb{J(F)}$ and we can not do the typical way for optimization problems). DNN and MOEAs could be merged if I consider it appropriate.
+On the other hand, I am going to explain more about MOEAs, in which we have the classical optimization problem with a vectorail field $F:\Omega \subset \mathbb{R^n} \to \mathbb{R^m}$, and we solve it with evolutionary algoritms (approximated algorithms, we do not know if $\exists \nabla F$ and we can not do the typical way for optimization problems). DNN and MOEAs could be merged if I consider it appropriate.
 
-First of all, let $F:\Omega \subset \mathbb{R^n} \to \mathbb{R^m}$ a vectorial field, and $g(x)=(g(x_1),...,g(x_k))<=0 \forall x \in \mathbb{R^n}$, i.e., $g(x_i)<=0 \text{ } \forall i \in {1,...,k}$.
+First of all, let $F:\Omega \subset \mathbb{R^n} \to \mathbb{R^m}$ a vectorial field, and $g(x)=(g(x_1),...,g(x_k))<=0 \text{ } \forall x \in \mathbb{R^n}$, i.e., $g(x_i)<=0 \text{ } \forall i \in {1,...,k}$.
 
-We define Pareto dominance as it follows: let $u,v \in \mathbb{R^m}$ solutions, $u=(u_1,...,u_m),v=(v_1,...,v_m)$, We say that $u$ dominates $v$ if $\forall i \in {{1,...,k}}$ $u_i$ is better or equal than $v_i$ and $\exists j \in {1,...,k} with which u_j is better than v_j$.
+We define Pareto dominance as it follows: let $u,v \in \mathbb{R^m}$ solutions, $u=(u_1,...,u_m),v=(v_1,...,v_m)$, We say that $u$ dominates $v$ if $\forall i \in {{1,...,k}}$ $u_i$ is better or equal than $v_i$ and $\exists j \in {1,...,k}$ with which $u_j$ is better than $v_j$.
 
-Lastly, we say x is an optimal Pareto in a domain $\Omega \subset \mathbb{R^n}$ if $F(x)$ dominates $F(y) \forall y \in \Omega$
+Lastly, we say $x$ is an optimal Pareto in a domain $\Omega \subset \mathbb{R^n}$ if $F(x)$ dominates $F(y) \forall y \in \Omega$
 
