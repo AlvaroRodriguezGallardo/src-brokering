@@ -22,3 +22,6 @@ Most algorithms can be used,. However, I think the most interesting can be:
 - **SVM (Support Vector Machine):** Powerful algorithm in which hiperplane which maximizes the distance between classes of a characteristics space. If we want a better behaviour we need to select a good kernel and make a good selection of parameter we have to optimise. In highly dimensional spaces, they are a good option. However, with knowledge I have now, I do not know how this algorithm can work effectivily in this step.
 
 ### 2- Where should I execute this order if I want to optimise execution?
+
+Algorithms previously mentioned can be used, but I want to make an special mention to deep neuronal networks (DNN) generally, because in this step we have a classification problem, and this algorithm can manage high inputs, and this is important for considering, because of the size of inputs within our system (even exabytes of information).
+
