@@ -42,3 +42,5 @@ We define Pareto dominance as it follows: let $u,v \in \mathbb{R^m}$ solutions, 
 Lastly, we say $x$ is an optimal Pareto in a domain $\Omega \subset \mathbb{R^n}$ if $F(x)$ dominates $F(y) \text{ } \forall y \in \Omega$.
 
 There are a wide range of MOEAs. However, I consider only two of them: tha classical MOEA (NSGA-II) and one in which divide and conquer logic is used (MOE/D).
+
+Using MOEAs could be more effective than only using one objective algorithms, because we have to optimise more than a resource. Maybe in MOE/D algorithm we use, for each piece, a scalar field, but the main view is like a MOEAs algorithm.
