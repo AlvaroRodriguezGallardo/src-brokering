@@ -25,3 +25,6 @@ Most algorithms can be used,. However, I think the most interesting can be:
 
 Algorithms previously mentioned can be used, but I want to make an special mention to deep neuronal networks (DNN) generally, because in this step we have a classification problem, and this algorithm can manage high inputs, and this is important for considering, because of the size of inputs within our system (even exabytes of information).
 
+Generally it could manage big datasets, and make good, even the optimal predictions. However, overfitting can appear, above all if training datasets are small. Besides, weitghts must be initialized in a good way if we want to make good predictions with the network. It is hard, so techniques proposed by Xavier or He could be used for that. Even hyperparameters are not a trivial selection.
+
+We can see that DNN is a very powerful algorithm for classification, but they are not easy to implement. We have to make good decisions if we want to have the optimal execution. Hyperparameters, initial weigths, auxiliar algorithms,..., we need to choose well, and test a lot the network. Because of that, I can affirm it spends a wide range of resources.
