@@ -39,5 +39,5 @@ First of all, let $F:\Omega \subset \mathbb{R^n} \to \mathbb{R^m}$ a vectorial f
 
 We define Pareto dominance as it follows: let $u,v \in \mathbb{R^m}$ solutions, $u=(u_1,...,u_m),v=(v_1,...,v_m)$, We say that $u$ dominates $v$ if $\forall i \in {{1,...,k}}$ $u_i$ is better or equal than $v_i$ and $\exists j \in {1,...,k}$ with which $u_j$ is better than $v_j$.
 
-Lastly, we say $x$ is an optimal Pareto in a domain $\Omega \subset \mathbb{R^n}$ if $F(x)$ dominates $F(y) \forall y \in \Omega$
+Lastly, we say $x$ is an optimal Pareto in a domain $\Omega \subset \mathbb{R^n}$ if $F(x)$ dominates $F(y) \text{ } \forall y \in \Omega$
 
