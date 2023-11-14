@@ -22,15 +22,16 @@ class unconstrainedProblem(Problem):
 class constrainedProblem(Problem):
 
     def __init__(self):
-        super().__init__(2,3,2) # Number of constraints equals i?
-        self.types[:] = {Real(0,2*math.pi),Real(0,math.pi)}
+        super().__init__(2, 3, 1)  # Number of constraints equals i?
+        self.types[:] = [Real(0, 2*math.pi), Real(0, math.pi)]
         self.constraints[:] = "<=0"
+
 
     def evaluate(self,solution):
         x = solution.variables[0]
         y = solution.variables[1]
-        solution.objectives = [x,y,x**2 + y**2]
-        solution.constraints[:] = [-x+y-1,x+y-7]
+        solution.objectives = [math.cos(x)*math.sin(y),math.sin(x)*math.sin(y),math.cos(y)]
+        solution.constraints[:] = [x**2 + y**2 -1]
 
 
 def storagingFile(my_result, dimension, file_name, folder_name='Results/'):
@@ -61,34 +62,31 @@ def executingDTLZ2():
     my_algorithm = NSGAII(my_problem)
     my_algorithm.run(10000)
 
-    storaging_route(my_algorithm.result(),2,'dtlz2.jpg')
+    storagingFile(my_algorithm.result,2,'dtlz2.jpg')
 
-    for solution in my_algorithm.result():
+    for solution in my_algorithm.result:
         print(solution.objectives)
 
 def executingUnconstrainedProblem():
     my_algorithm = NSGAII(unconstrainedProblem())
     my_algorithm.run(10000)
 
-    storaging_route(my_algorithm.result(),2,'unconstrained.jpg')
+    storagingFile(my_algorithm.result,2,'unconstrained.jpg')
 
-    for solution in my_algorithm.result():
+    for solution in my_algorithm.result:
         print(solution.objectives)
 
 def executingConstrainedProblem():
     my_algorithm = NSGAII(constrainedProblem())
     my_algorithm.run(10000)
 
-    storaging_route(my_algorithm.result(),3,'constrained.jpg')
+    storagingFile(my_algorithm.result,3,'constrained.jpg')
 
-    for solution in my_algorithm.result():
+    for solution in my_algorithm.result:
         print(solution.objectives)
 
 
-
-
-
-if __main__ == '__main__':
+if __name__ == '__main__':
     print("------------------------------------------------------------   DTLZ2 PROBLEM WITH NSGAII ALGORITHM   ------------------------------------------------------------------------------")
     executingDTLZ2()
     print("------------------------------------------------------------*****************************************------------------------------------------------------------------------------")
