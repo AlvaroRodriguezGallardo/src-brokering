@@ -35,7 +35,7 @@ Here it is compared a simple neuronal network with a DNN. Each vertical group is
 
 On the other hand, I am going to explain about **MOEAs**, in which we have the classical optimization problem with a vectorail field $F:\Omega \subset \mathbb{R^n} \to \mathbb{R^m}$, and we solve it with evolutionary algoritms (approximated algorithms, we do not know if $\exists \nabla F$ and we can not do the typical way for optimization problems). DNN and MOEAs could be merged if I consider it appropriate.
 
-First of all, let $F:\Omega \subset \mathbb{R^n} \to \mathbb{R^m}$ a vectorial field, and $g(x)=(g(x_1),...,g(x_k))<=0 \text{ } \forall x \in \mathbb{R^n}$, i.e., $g(x_i)<=0 \text{ } \forall i \in \left\lbrace 1,...,k\rigth\rbrace$.
+First of all, let $F:\Omega \subset \mathbb{R^n} \to \mathbb{R^m}$ a vectorial field, and $g(x)=(g(x_1),...,g(x_k))<=0 \text{ } \forall x \in \mathbb{R^n}$, i.e., $g(x_i)<=0 \text{ } \forall i \in \left 1,...,k\rigth$.
 
 We define Pareto dominance as it follows: let $u,v \in \mathbb{R^m}$ solutions, $u=(u_1,...,u_m),v=(v_1,...,v_m)$, We say that $u$ dominates $v$ if $\forall i \i \{1,...,k\}$ $u_i$ is better or equal than $v_i$ and $\exists j \in \{1,\ldots,k\}$ with which $u_j$ is better than $v_j$.
 
