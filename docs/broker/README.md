@@ -45,3 +45,4 @@ There are a wide range of MOEAs. However, I consider only two of them: tha class
 
 Using MOEAs could be more effective than only using one objective algorithms, because we have to optimise more than a resource. Maybe in MOE/D algorithm we use, for each piece, a scalar field, but the main view is like a MOEAs algorithm.
 
+Library I will use is [Platypus](https://platypus.readthedocs.io/en/latest/) for MOEA. For DNN, I guess [Fastai](https://www.fast.ai/) is a good option.
