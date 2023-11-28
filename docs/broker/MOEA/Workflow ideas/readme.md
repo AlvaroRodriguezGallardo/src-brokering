@@ -1,4 +1,4 @@
-**We have the following problem**: We have N functions, $X_1,...,X_N$, and we want to execute a workflow optimising parameters like execution time and energy consumption. Broker receives this functions and it wants to minimise parameters mentioned, selecting in which node that function should be executed.
+**We have the following problem**: We have N functions, $X_1,...,X_N$, and we want to execute a workflow optimising parameters like execution time and energy consumption. Broker receives this functions and it wants to minimise parameters mentioned, selecting in which node that function should be executed. I suppose M nodes, and I note node j $\forall$ j=1,...,M
 
 For each function, we say, $X_i$ where $i=1,...,N$, it gets as reference values if that function is executed in CPU. It makes a decision depending on what function needs to being executed. Some restrictions are:
 - $X_i$ needs GPU: Energy consumption increases but execution time decreases, depending on given performance. However, using ARM it reduces energy consumption penalty.
