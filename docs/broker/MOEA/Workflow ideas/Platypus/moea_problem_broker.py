@@ -20,6 +20,7 @@ class MOEAforbroker(Problem):
         objective_values = evaluate_function(values)
 
         #  I put my objectives values in an array. They are values I want to minimise (?)
+        solution.objectives[:] = objective_values
 
 
 # Evaluation function
