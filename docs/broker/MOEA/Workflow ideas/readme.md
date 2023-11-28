@@ -12,4 +12,8 @@ Note that time spent transferring data from other nodes has a particular behavio
 
 Some schemas with supposed workflows of broker decisions will be upload here. With them, problem should be modeled, and lastly we automate it with a MOEA.
 
-I suppose firstly that functions are independent. It means, $X_i$ does not depend on $X_i$ results, where $i \distinct j$, i,j=1,...,N. In a future, we can introduces dependencies and problem should be treated with a graph as an input, where vertexs are functions and aristas are dependencies between functions.
+I suppose firstly that functions are independent. It means, $X_i$ does not depend on $X_i$ results, where $i \neq j$, i,j=1,...,N. In a future, we can introduces dependencies and problem should be treated with a graph as an input, where vertexs are functions and aristas are dependencies between functions.
+
+Here I have a first approximation to the decision problem, made in Draw.io
+
+![DiagramaMOEAbecaJAE drawio](https://github.com/AlvaroRodriguezGallardo/src-brokering/assets/80212790/1efc70fd-3dce-447d-8423-5287a2288714)
