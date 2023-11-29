@@ -17,3 +17,16 @@ I suppose firstly that functions are independent. It means, $X_i$ does not depen
 Here I have a first approximation to the decision problem, made in Draw.io
 
 ![DiagramaMOEAbecaJAE drawio](https://github.com/AlvaroRodriguezGallardo/src-brokering/assets/80212790/1efc70fd-3dce-447d-8423-5287a2288714)
+
+In the next lines, I will be explaining my hypothesis about how objetive functions can be modeled:
+
+## Execution time in CPU (no GPU required)
+
+Firsty I suppose transfer time between nodes independent (if we have dependencies, like in a graph, them there are implicit functions and it complicates our problem). Now, it is supposed a paralel execution, in which n_cores cores in CPU have an uniform distribution (i.e., work is distributed uniformly). With that, I denote A a set where there are indexs of another nodes with needed data but are not the node in which execution is being done (even that, an access time exists with data in the same node). If $tTransf_j$ is time spent transferring data from node $j \in A$, then time needed to transferring data from other nodes is $$ totalTimeTransf = \sum_{j \in A} tTransf_j$$. With access time, then execution time in CPU is $$tEjec = tAccessData + totalTimeTransf$$
+
+Now I am going to make a little analysis. Transfer time is independent between nodes (in other case, there are implicit functions, and that problems should be solved before executing this function). We have two cases:
+
+ - If n_cores is fixed, then we have a straight with $\( \lvert A \rvert \)$ variables. In other words, we are working in a $\( \lvert A \rvert \)$-dimensional space.
+ - If n_cores is variable, we say $n_cores \in \mathbb{N}$, then we have a $\( \lvert A \rvert \) + 1$-dimensional function, with a vertical asymptote in n_cores=0. As we need at minimim one core in CPU, then it is not now a problem (but yes with GPU).
+
+Summarizing, becuase of assuming n_cores variable is not a problem (n_cores is not 0 in CPU) then we have a function with asymptotic behaviour, but we can think in it like a linear behaviour depending on time. We have $\( \lvert A \rvert \) + 2$ variables.
