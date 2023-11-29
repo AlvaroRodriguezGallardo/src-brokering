@@ -45,6 +45,7 @@ def evaluate_function(values):
     t_execution_planning = getExecutionTimePlanning(cpu_cores=cpu_cores,gpu_cores=gpu_cores,use_arm=use_arm,get_data_other_nodes=get_data_other_nodes,node_load=node_load)
     energy_consumption = getEnergyConsumptionPlanning(cpu_cores=cpu_cores,gpu_cores=gpu_cores,use_arm=use_arm,get_data_other_nodes=get_data_other_nodes,node_load=node_load)
 
+    return t_execution_planning,energy_consumption
 
 # In this problem, it is supposed VARIABLES ARE INDEPENDENT, EVEN IF SOME SOLUTIONS CONSIDER THEM AS RANDOM VARIABLES
 
@@ -53,10 +54,40 @@ def evaluate_function(values):
 #   - If get_data_other_nodes.isEmpty() then needed data will be within node.
 
 def getExecutionTimePlanning(cpu_cores,gpu_cores,use_arm,get_data_other_nodes,node_load):
+    time = executionTimePlannedWithCPU(cpu_cores,get_data_other_nodes)
 
+    if gpu_cores != 0:
+        time = executionTimePlannedWithGPU(gpu_cores,use_arm,get_data_other_nodes)
+    
+    return (1.0+node_load)*time
+
+
+def executionTimePlannedWithCPU(cpu_cores,get_data_other_nodes):
+    ...
+    #Here I define an approach function to cpu time
+
+
+def executionTimePlannedWithGPU(gpu_cores,use_arm,get_data_other_nodes):
+    ...
+    # The same with GPU time
 
 # Some restrictions:
 #   - If gpu_cores==0, then GPU will not be needed
 #   - If get_data_other_nodes.isEmpty() then needed data will be within node.
 
 def getEnergyConsumptionPlanning(cpu_cores,gpu_cores,use_arm,get_data_other_nodes,node_load):
+    energy = energyPlannedWithCPU(cpu_cores,get_data_other_nodes)
+
+    if gpu_cores != 0:
+        energy = energyPlannedWithGPU(gpu_cores,use_arm,get_data_other_nodes)
+
+    return (1.0+node_load)*energy
+
+
+def energyPlannedWithCPU(cpu_cores,get_data_other_nodes):
+    ...
+    # The same but energy with CPU
+
+def energyPlannedWithGPU(gpu_cores,use_arm,get_data_other_nodes):
+    ...
+    # The same as before with GPU
