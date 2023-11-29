@@ -28,8 +28,8 @@ Firsty I suppose transfer time between nodes independent (if we have dependencie
 
 Now I am going to make a little analysis. Transfer time is independent between nodes (in other case, there are implicit functions, and that problems should be solved before executing this function). We have two cases:
 
- - If nCores is fixed, then we have a straight with #A variables. In other words, we are working in a $#A$-dimensional space.
- - If nCores is variable, we say $n_cores \in \mathbb{N}$, then we have a #A+1-dimensional function, with a vertical asymptote in n_cores=0. As we need at minimim one core in CPU, then it is not now a problem (but yes with GPU).
+ - If nCores is fixed, then we have a straight with #A variables. In other words, we are working in a #A-dimensional space.
+ - If nCores is variable, we say $nCores \in \mathbb{N}$, then we have a #A+1-dimensional function, with a vertical asymptote in n_cores=0. As we need at minimum one core in CPU, then it is not now a problem (but yes with GPU).
 
 Summarizing, becuase of assuming n_cores variable is not a problem (n_cores is not 0 in CPU) then we have a function with asymptotic behaviour, but we can think in it like a linear behaviour depending on time. We have #A+2 variables.
 
