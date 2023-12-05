@@ -46,7 +46,12 @@ Summarising, we can abstract execution time expression as the next one $$tEjec =
 
 ## Energy consumption with CPU (no GPU).
 
+First of all, I expose situations in which there is an increment of energy consumption:
 
+- More cores $\implies$ more energy consumption.
+- More data to process $\implies$ more energy consumption.
+- Do I need to convey data to other nodes? If yes $\implies$ more energy consumption.
+- Do I need data from other nodes? If yes $\implies$ more energy consumption (because while I am waiting, I consume energy).
 
 ## Energy consumption generally.
 
