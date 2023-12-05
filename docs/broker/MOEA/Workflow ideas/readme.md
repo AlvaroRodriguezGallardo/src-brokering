@@ -42,3 +42,14 @@ However, it is an ideal situation. Node i is connected with other nodes, and the
 As I discuss in this [pdf](https://github.com/AlvaroRodriguezGallardo/src-brokering/blob/main/docs/broker/MOEA/Workflow%20ideas/Discusion_uso_1_n_p.pdf), it is proposed function $frac{1}{{n^p}}$ generally, where n is number of cores (even if it is writen like n, it can be a rational number) and it is fixed p depending on hardware technology. For example, in CPU, as it was modeled previously, then p=1. For GPU, p>1, for example p=3, but the exact value should be studied thoroughly.
 
 Summarising, we can abstract execution time expression as the next one $$tEjec = tAccessData + \frac{1}{nCores^p}\sum_{j \in A} tTransf_j + \sum_{j \in A} t_{ij} + \sum_{j \in A} t_{ji} + \sum_{j \in A} tEjec_j$$
+
+
+## Energy consumption with CPU (no GPU).
+
+
+
+## Energy consumption generally.
+
+I have thought in two options:
+- If $f$ is function that models execution time, then as I have understood, then energy consumption has an inverse behaviour. So intuitively it can be thought we should get a function, let g, with which $f \circ g = (x_1,...,x_p)$, where f has p variables. In other words, $g=f^{-1}$
+- Trying to modelise energy consumption as it was made with execution time. In this case, CPU and GPU has an inverse behaviour from exection time, and I think that behaviour is different in this case, so it must be studied thoroughly.
