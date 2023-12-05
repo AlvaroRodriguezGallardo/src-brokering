@@ -55,7 +55,7 @@ First of all, I expose situations in which there is an increment of energy consu
 
 ## Energy consumption generally.
 
-I have thought in two options:
+I have thought in three options:
 - If $f$ is function that models execution time, then as I have understood, then energy consumption has an inverse behaviour. So intuitively it can be thought we should get a function, let g, with which $f \circ g = (x_1,...,x_p)$, where f has p variables. In other words, $g=f^{-1}$. However, in expression of f (we call it $tEjec$), none variable can be cleared, that represents energy consumption (of course, because it has been supposed, and I think it is real, that are independent variables). Besides, because of implicit functions it is not a feasible option (we do not know how much data from other nodes is needed, so it can be hard to find a good explicit expression).
 - We know $f$ can not be 0, and energy consumption seems to have an inverse behaviour. In this case, and because it seems that energy consumption has the same variables as execution time, but with inverse behaviour, then it is proposed that, if g represents energy consumption, then $g=(f)^{-1}=\frac{1}{f}$. It is an option, but I think not the best (surely other variables or some situations are not taken into account).
 - Trying to modelise energy consumption as it was made with execution time. In this case, CPU and GPU has an inverse behaviour from exection time, and I think that behaviour is different in this case, so it must be studied thoroughly. I will try to unify hardware behaviour as I did in execution time, studying successions of functions and proposing them as a feasible option.
