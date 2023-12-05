@@ -37,6 +37,8 @@ Now, it is assumed there is transmission time. I think it is not difficult to co
 
 However, it is an ideal situation. Node i is connected with other nodes, and they have the same behaviour as node i, so they will have an access time, transmission time with other nodes if it needs information in another node... We can suppose node j can need data from node i, and with next expression we do not add extra time (and it is not an eternal loop because in a moment, node i should not need more data from node j), and the reason is, if node j need data from node i, then it will have a transmission time too, independiently if node i has called node j previously. Because of this, function that models execution time can be $$tEjec = tAccessData + \frac{1}{nCores}\sum_{j \in A} tTransf_j + \sum_{j \in A} t_{ij} + \sum_{j \in A} t_{ji} + \sum_{j \in A} tEjec_j$$
 
+Note transmission time is duplicated. If node i needs data from node j, then we have a $t_{ij}$. But $t_{ji} is implicit in the recursive function like transmission time from node j to i. Recursive function represents time node i needs to wait to receive data needed from node j, so transmission time, $t_{ji} is within it. So, proposed function is $$tEjec = tAccessData + \frac{1}{nCores}\sum_{j \in A} tTransf_j + \sum_{j \in A} t_{ij} + \sum_{j \in A} tEjec_j$$
+
 ## Execution time in general.
 
 As I discuss in this [pdf](https://github.com/AlvaroRodriguezGallardo/src-brokering/blob/main/docs/broker/MOEA/Workflow%20ideas/Discusion_uso_1_n_p.pdf), it is proposed function $frac{1}{{n^p}}$ generally, where n is number of cores (even if it is writen like n, it can be a rational number) and it is fixed p depending on hardware technology. For example, in CPU, as it was modeled previously, then p=1. For GPU, p>1, for example p=3, but the exact value should be studied thoroughly.
@@ -49,9 +51,13 @@ Summarising, we can abstract execution time expression as the next one $$tEjec =
 First of all, I expose situations in which there is an increment of energy consumption:
 
 - More cores $\implies$ more energy consumption.
-- More data to process $\implies$ more energy consumption.
+- More data to process $\implies$ more energy consumption (depending on the algorithm, energy consumption increases).
 - Do I need to convey data to other nodes? If yes $\implies$ more energy consumption.
 - Do I need data from other nodes? If yes $\implies$ more energy consumption (because while I am waiting, I consume energy).
+
+It is supposed we want a function that models energy consumption in general, so function must take into account energy consumption of foreign nodes. We use the same set A mentioned above. Then a possible function can be $$EnConsumption=EnConsumptionProcessing + \sum_{j \in A} EnConsTransmission_{ij} + \sum_{j \in A} EnWaitingNode_j$$. Here, we have energy consumption in processing data (it includes algorithms used within node, access to data within node,..., it is a variable that must be studied thoroughly). We also have a variable that represents energy spend in transmission operations. Then, as it was hypothesized, if node i needs data from other nodes, then it must wait to execution in other nodes, so although consumption in node i does not depend on consumption in other nodes, it depends on how much time node i must wait to operations in other nodes, it must be active I guess(**I think I have found a dependence between execution time and energy consumption**).
+
+Note that function above does not have explicitly number of cores. It may be studied before. In time it was considered successions of functions $\{\frac{1}{x^p}\}$. Although $\{x^p\}$ where $p \in \mathbb{N}$ is an option, and fulfills restrictions on energy consumption in CPU/GPU/ARM, or other hardware componentes, I do not know if cores function should have a $x^p$ behaviour.
 
 ## Energy consumption generally.
 
