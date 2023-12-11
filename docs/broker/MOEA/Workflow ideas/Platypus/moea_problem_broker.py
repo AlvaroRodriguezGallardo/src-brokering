@@ -1,5 +1,6 @@
 from platypus import NSGAIII, DTLZ2
-
+import numpy as np
+import random
 
 # For execution time, we use expression {1/(n_cores)^p}, where p depemds on hardware technology used, i.e, p_CPU < p_ARM < p_GPU. Justification is explained in https://github.com/AlvaroRodriguezGallardo/src-brokering/blob/main/docs/broker/MOEA/broker_optimisation_algorithm.pdf
 
@@ -7,6 +8,7 @@ from platypus import NSGAIII, DTLZ2
 p_CPU = 1
 p_ARM = 2
 p_GPU = 3
+N_execution_plannings = 10
 
 class MOEAforbroker(Problem):
     def __init__(self, N_functions,P_decision_var):
@@ -29,6 +31,24 @@ class MOEAforbroker(Problem):
         #  I put my objectives values in an array. They are values I want to minimise (?)
         solution.objectives[:] = objective_values
 
+
+def averageNormalDistribution():
+    average = 0
+    variance = 1
+    value = np.random.normal(loc=average,scale=variance,size=1)
+
+    return value
+
+# Auxiliar function in which time is got
+def getRandomTime():
+    # It is supposed a typical normal
+    # It models time, so we make sure it is a non negative float
+    return np.abs(averageNormalDistribution())
+
+def getRandomEnergy():
+    # Energy >= 0.0
+    # It models time, so we make sure it is a non negative float
+    return np.abs(averageNormalDistribution())
 
 # Evaluation function
 # Some variables are needed for MOEA. 'values' is a dictionary with next fields:
@@ -179,23 +199,87 @@ def executionTimePlannedWithARM(arm_cores,get_data_other_nodes):
     time_other_nodes_final = time_other_nodes
 
     return (tTransf_final + t_i_j_final + t_j_i_final + time_other_nodes_final)
+
 # Some restrictions:
 #   - If gpu_cores==0, then GPU will not be needed
 #   - If get_data_other_nodes.isEmpty() then needed data will be within node.
 
 def getEnergyConsumptionPlanning(cpu_cores,gpu_cores,arm_nodes,get_data_other_nodes,node_load):
-    energy = energyPlannedWithCPU(cpu_cores,get_data_other_nodes)
-
-    if gpu_cores != 0:
-        energy = energyPlannedWithGPU(gpu_cores,use_arm,get_data_other_nodes)
+   
+    if cpu_cores != 0.0 and gpu_cores == 0.0 and arm_cores == 0.0:
+        energy = energyPlannedWithCPU(cpu_cores,get_data_other_nodes)
+    
+    if cpu_cores == 0.0 and gpu_cores != 0.0 and arm_cores == 0.0:
+        energy = energyPlannedWithGPU(gpu_cores,get_data_other_nodes)
+   
+    if cpu_cores == 0.0 and gpu_cores == 0.0 and arm_cores != 0.0:
+        energy = energyPlannedWithARM(arm_cores,get_data_other_nodes)
 
     return (1.0+node_load)*energy
 
 
 def energyPlannedWithCPU(cpu_cores,get_data_other_nodes):
-    ...
     # The same but energy with CPU
+    EnWaitingNode = 0.0
+    EnConsTransmission = 0.0
 
-def energyPlannedWithGPU(gpu_cores,use_arm,get_data_other_nodes):
-    ...
-    # The same as before with GPU
+    for node in get_data_other_nodes:
+        # While this loop is running, EnWaitingNode should increase
+        EnConsTransmission = EnConsTransmission + getRandomEnergy()
+        # Here this thread should be waiting to another thread work
+        EnWaitingNode = EnWaitingNode + getRandomEnergy()   # It could be modelised with a semaphore or monitor
+        # IF WE SHOULD TAKE INTO ACCOUNT ENERGY IN OTHER NODE, WE SHOULD DO IT HERE
+
+    EnConsumptionProcessing = getRandomEnergy() * (cpu_cores**p_CPU)
+
+    return (EnConsumptionProcessing+EnConsTransmission+EnWaitingNode)
+
+def energyPlannedWithGPU(gpu_cores,get_data_other_nodes):
+¡    # The same as before with GPU
+    EnWaitingNode = 0.0
+    EnConsTransmission = 0.0
+
+    for node in get_data_other_nodes:
+        # While this loop is running, EnWaitingNode should increase
+        EnConsTransmission = EnConsTransmission + getRandomEnergy()
+        # Here this thread should be waiting to another thread work
+        EnWaitingNode = EnWaitingNode + getRandomEnergy()   # It could be modelised with a semaphore or monitor
+        # IF WE SHOULD TAKE INTO ACCOUNT ENERGY IN OTHER NODE, WE SHOULD DO IT HERE WITH RECURSIVITY
+
+    EnConsumptionProcessing = getRandomEnergy() * (cpu_cores**p_GPU)
+
+    return (EnConsumptionProcessing+EnConsTransmission+EnWaitingNode)
+
+def energyPlannedWithARM(arm_cores,get_data_other_nodes):
+    EnWaitingNode = 0.0
+    EnConsTransmission = 0.0
+
+    for node in get_data_other_nodes:
+        # While this loop is running, EnWaitingNode should increase
+        EnConsTransmission = EnConsTransmission + getRandomEnergy()
+        # Here this thread should be waiting to another thread work
+        EnWaitingNode = EnWaitingNode + getRandomEnergy()   # It could be modelised with a semaphore or monitor
+        # IF WE SHOULD TAKE INTO ACCOUNT ENERGY IN OTHER NODE, WE SHOULD DO IT HERE
+
+    EnConsumptionProcessing = getRandomEnergy() * (cpu_cores**p_ARM)
+
+    return (EnConsumptionProcessing+EnConsTransmission+EnWaitingNode)
+
+if __name__ == "__main__":
+    # IN THIS PROGRAM, IT IS SUPPOSED WE WANT TO RUN A FUNCTION IN A CERTAIN NODE
+    # Here, do I initialize some random execution plans?
+    # I suppose cores have a typical normal distribution  (I guess it does not matter, because they can be float, but firstly I thought in a binomial distribution --> it returns natural numbers)
+    execution_plannings = {}
+
+    for i in range(0,N_execution_plannings):
+        n_nodes_needed = random.randint(0,10)    # 0 if we do not need data from other nodes
+        random_nodes = []
+        for j in range(0,n_nodes_needed):
+            random.nodes.append(random.random())    # In this simulation, we only need to know how many nodes the node needs to, but in a real situation, we should know quantity an which nodes are
+        plan = {
+            'cpu_cores' = np.abs(averageNormalDistribution()),
+            'gpu_cores' = np.abs(averageNormalDistribution()),
+            'arm_cores' = np.abs(averageNormalDistribution()),
+            'get_data_other_nodes': random_nodes,
+            'data_load': random.uniform(0,1)
+        }
