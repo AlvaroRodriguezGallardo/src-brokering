@@ -8,28 +8,31 @@ import random
 p_CPU = 1
 p_ARM = 2
 p_GPU = 3
-N_execution_plannings = 10
+N_execution_plannings = 1 # It could generalise to a array of dictionaries but functions must be tight
 
 class MOEAforbroker(Problem):
-    def __init__(self, N_functions,P_decision_var):
+    def __init__(self, N_functions=2,P_decision_var=2):
         # I establish objectives number (N functions) and how many decision variables there are
         super(MOEAforbroker,self).__init__(N_functions,P_decision_var)
 
         # I define decision variables limits. Between 0 and 1. Near to 1 is a good option in the execution planning
-        self.types[:] = [Real(0,1)]*N_functions
-
+        #self.types[:] = [Real(0,1)]*N_functions
+        self.types[:] = [Real(0,1*60*60),Real(0,200)]   # maximum 1 hour, 200 W
+                                                        # Maybe can they only be positive?
         # What do I want to? --> A minimization problem
-        self.directions[:] = [self.MINIMIZE] * N_functions
+        #self.directions[:] = [self.MINIMIZE] * N_functions
+        self.directions[:] = [Problem.MINIMIZE,Problem.MINIMIZE]
 
     def evaluate(self,solution):
         # I get values of decision variables
         values = solution.variables
-
+        # It is supposed 'values' a dictionary as it is inisialised in main function
         # Evaluation function is used to evaluate execution planning given
-        objective_values = evaluate_function(values)
+        t_exec, e_consumption = evaluate_function(values)
 
         #  I put my objectives values in an array. They are values I want to minimise (?)
-        solution.objectives[:] = objective_values
+        solution.objectives[0] = t_exec
+        solution.objectives[1] = e_consumption
 
 
 def averageNormalDistribution():
@@ -269,7 +272,7 @@ if __name__ == "__main__":
     # IN THIS PROGRAM, IT IS SUPPOSED WE WANT TO RUN A FUNCTION IN A CERTAIN NODE
     # Here, do I initialize some random execution plans?
     # I suppose cores have a typical normal distribution  (I guess it does not matter, because they can be float, but firstly I thought in a binomial distribution --> it returns natural numbers)
-    execution_plannings = {}
+    execution_plannings = []
 
     for i in range(0,N_execution_plannings):
         n_nodes_needed = random.randint(0,10)    # 0 if we do not need data from other nodes
@@ -283,3 +286,21 @@ if __name__ == "__main__":
             'get_data_other_nodes': random_nodes,
             'data_load': random.uniform(0,1)
         }
+        execution_plannings.append(plan)
+
+    # An instance of our problem
+    problem = MOEAforbroker()
+
+    # Some algorithms we can execute, in an array
+    algorithms = [NSGAIII(problem)]
+    # If we have an array of plannings, we should initialise a loop here, before loop of algorithms
+    for alg in algorithms:
+        alg.run(10000)
+
+        optimal_solutions = alg.result
+        print(alg)
+        for solution in optimal_solutions:
+            print("Execution time: ",solution.variables[0])
+            print("Energy consumption: ",solution.variables[1])
+            print("Objectives: ",solution.objectives)
+            print()
