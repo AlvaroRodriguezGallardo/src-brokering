@@ -1,4 +1,4 @@
-from platypus import NSGAIII, DTLZ2
+from platypus import NSGAII, Problem, Real
 import numpy as np
 import random
 
@@ -10,29 +10,39 @@ p_ARM = 2
 p_GPU = 3
 N_execution_plannings = 1 # It could generalise to a array of dictionaries but functions must be tight
 
+max_cpu_cores = 10
+max_gpu_cores = 10
+max_arm_cores = 10
+max_node_in_graph = 40
+                                
 class MOEAforbroker(Problem):
-    def __init__(self, N_functions=2,P_decision_var=2):
+    def __init__(self, N_functions_tuplas=2,P_decision_var=4):
         # I establish objectives number (N functions) and how many decision variables there are
-        super(MOEAforbroker,self).__init__(N_functions,P_decision_var)
+        super(MOEAforbroker,self).__init__(P_decision_var,N_functions_tuplas)
 
         # I define decision variables limits. Between 0 and 1. Near to 1 is a good option in the execution planning
         #self.types[:] = [Real(0,1)]*N_functions
-        self.types[:] = [Real(0,1*60*60),Real(0,200)]   # maximum 1 hour, 200 W
+        self.types[:] = [Real(0,max_cpu_cores),Real(0,max_gpu_cores),Real(0,max_arm_cores),Real(0,1)]   #Independent variables and their domain
                                                         # Maybe can they only be positive?
+    #    N_nodes_need = random.randint(0, max_node_in_graph)  # Platypus cannot use a list for a decision variable, but we can do it manually, but max nodes in the graph are needed
+     #   for i in range(4,N_nodes_need+4):   # If N_nodes_need = 0, then this loop is not executed 
+      #          self.types.append(Integer(0,N_nodes_need))
+    
         # What do I want to? --> A minimization problem
         #self.directions[:] = [self.MINIMIZE] * N_functions
-        self.directions[:] = [Problem.MINIMIZE,Problem.MINIMIZE]
+        self.directions[:] = [Problem.MINIMIZE,Problem.MINIMIZE]    # Vector I want to get. Imagine this function F:R^5 --> R^2
 
     def evaluate(self,solution):
         # I get values of decision variables
         values = solution.variables
+        
         # It is supposed 'values' a dictionary as it is inisialised in main function
         # Evaluation function is used to evaluate execution planning given
-        t_exec, e_consumption = evaluate_function(values)
+        res = evaluate_function(values)
+        t_exec,e_consumption = res
 
-        #  I put my objectives values in an array. They are values I want to minimise (?)
-        solution.objectives[0] = t_exec
-        solution.objectives[1] = e_consumption
+        #  I put my objectives values in an array. They are values I want to minimise (?) YES
+        solution.objectives[:] = [t_exec[0],e_consumption[0]]
 
 
 def averageNormalDistribution():
@@ -63,18 +73,36 @@ def getRandomEnergy():
 # Evaluation function receives a dictionary 'solution' which is the proposed one to the algorithm
 
 def evaluate_function(values):
-    cpu_cores = values["cpu_cores"]                         # double
-    gpu_cores = values["gpu_cores"]                         # double. If gpu_cores==0, then it is supposed GPU is not needed
-    arm_cores = values["arm_cores"]                             # double
-    get_data_other_nodes = values["get_data_other_nodes"]   # List<int>. If get_data_other_nodes.is_empty(), then it is supposed all needed data is within the node
-    node_load = values["node_load"]                         # Float \in [0,1]
+    cpu_cores = values[0]                         # double
+    gpu_cores = values[1]                         # double. If gpu_cores==0, then it is supposed GPU is not needed
+    arm_cores = values[2]                             # double
+    node_load = values[3]                         # Float \in [0,1]
+
+   # get_data_other_nodes = values[4:]           # List<int>. If get_data_other_nodes.is_empty(), then it is supposed all needed data is within the node
+    get_data_other_nodes = []
+
+    N_nodes_need = random.randint(0,max_node_in_graph)
+    id_my_node = random.randint(0,max_node_in_graph)        # Maybe node in which function is executed is not in the list of avaliable nodes
+    for i in range(0,N_nodes_need):
+        id_node = random.randint(0,N_nodes_need)
+        if id_node != id_my_node:
+            get_data_other_nodes.append(id_node)
 
    # assert cpu_cores>0, "Specify how many cores you want to run in CPU"
     assert 0.0<=node_load<=1.0, "node_load must be a float between 0.0 and 1.0"
 
-    t_execution_planning = getExecutionTimePlanning(cpu_cores=cpu_cores,gpu_cores=gpu_cores,use_arm=use_arm,get_data_other_nodes=get_data_other_nodes,node_load=node_load)
-    energy_consumption = getEnergyConsumptionPlanning(cpu_cores=cpu_cores,gpu_cores=gpu_cores,use_arm=use_arm,get_data_other_nodes=get_data_other_nodes,node_load=node_load)
+    # I implement restrictions about cores. If cpu_cores > 0 then gpu_cores = arm_cores = 0. But they are real positive numbers, then randomly I will do that
+    which_hardware_used = random.randint(0,2)
+    if which_hardware_used == 0:
+        gpu_cores = arm_cores = 0.0
+    if which_hardware_used == 1:
+        cpu_cores = arm_cores = 0.0
+    if which_hardware_used == 2:
+        cpu_cores = gpu_cores = 0.0
 
+    t_execution_planning = getExecutionTimePlanning(cpu_cores=cpu_cores,gpu_cores=gpu_cores,arm_cores=arm_cores,get_data_other_nodes=get_data_other_nodes,node_load=node_load)
+    energy_consumption = getEnergyConsumptionPlanning(cpu_cores=cpu_cores,gpu_cores=gpu_cores,arm_cores=arm_cores,get_data_other_nodes=get_data_other_nodes,node_load=node_load)
+ 
     return t_execution_planning,energy_consumption
 
 # In this problem, it is supposed VARIABLES ARE INDEPENDENT, EVEN IF SOME SOLUTIONS CONSIDER THEM AS RANDOM VARIABLES
@@ -85,7 +113,7 @@ def evaluate_function(values):
 #   - It is supposed hardware technology is exclusive (i.e. if ARM is used, then CPU and GPU are not used)
 #   - If get_data_other_nodes.isEmpty() then needed data will be within node.
 
-def getExecutionTimePlanning(cpu_cores,gpu_cores,use_arm,get_data_other_nodes,node_load):
+def getExecutionTimePlanning(cpu_cores,gpu_cores,arm_cores,get_data_other_nodes,node_load):
     
     if cpu_cores != 0.0 and gpu_cores == 0.0 and arm_cores == 0.0:
         time = executionTimePlannedWithCPU(cpu_cores,get_data_other_nodes)
@@ -207,7 +235,7 @@ def executionTimePlannedWithARM(arm_cores,get_data_other_nodes):
 #   - If gpu_cores==0, then GPU will not be needed
 #   - If get_data_other_nodes.isEmpty() then needed data will be within node.
 
-def getEnergyConsumptionPlanning(cpu_cores,gpu_cores,arm_nodes,get_data_other_nodes,node_load):
+def getEnergyConsumptionPlanning(cpu_cores,gpu_cores,arm_cores,get_data_other_nodes,node_load):
    
     if cpu_cores != 0.0 and gpu_cores == 0.0 and arm_cores == 0.0:
         energy = energyPlannedWithCPU(cpu_cores,get_data_other_nodes)
@@ -238,7 +266,7 @@ def energyPlannedWithCPU(cpu_cores,get_data_other_nodes):
     return (EnConsumptionProcessing+EnConsTransmission+EnWaitingNode)
 
 def energyPlannedWithGPU(gpu_cores,get_data_other_nodes):
-¡    # The same as before with GPU
+    # The same as before with GPU
     EnWaitingNode = 0.0
     EnConsTransmission = 0.0
 
@@ -249,7 +277,7 @@ def energyPlannedWithGPU(gpu_cores,get_data_other_nodes):
         EnWaitingNode = EnWaitingNode + getRandomEnergy()   # It could be modelised with a semaphore or monitor
         # IF WE SHOULD TAKE INTO ACCOUNT ENERGY IN OTHER NODE, WE SHOULD DO IT HERE WITH RECURSIVITY
 
-    EnConsumptionProcessing = getRandomEnergy() * (cpu_cores**p_GPU)
+    EnConsumptionProcessing = getRandomEnergy() * (gpu_cores**p_GPU)
 
     return (EnConsumptionProcessing+EnConsTransmission+EnWaitingNode)
 
@@ -264,7 +292,7 @@ def energyPlannedWithARM(arm_cores,get_data_other_nodes):
         EnWaitingNode = EnWaitingNode + getRandomEnergy()   # It could be modelised with a semaphore or monitor
         # IF WE SHOULD TAKE INTO ACCOUNT ENERGY IN OTHER NODE, WE SHOULD DO IT HERE
 
-    EnConsumptionProcessing = getRandomEnergy() * (cpu_cores**p_ARM)
+    EnConsumptionProcessing = getRandomEnergy() * (arm_cores**p_ARM)
 
     return (EnConsumptionProcessing+EnConsTransmission+EnWaitingNode)
 
@@ -272,29 +300,31 @@ if __name__ == "__main__":
     # IN THIS PROGRAM, IT IS SUPPOSED WE WANT TO RUN A FUNCTION IN A CERTAIN NODE
     # Here, do I initialize some random execution plans?
     # I suppose cores have a typical normal distribution  (I guess it does not matter, because they can be float, but firstly I thought in a binomial distribution --> it returns natural numbers)
-    execution_plannings = []
+   
+#    execution_plannings = []
 
-    for i in range(0,N_execution_plannings):
-        n_nodes_needed = random.randint(0,10)    # 0 if we do not need data from other nodes
-        random_nodes = []
-        for j in range(0,n_nodes_needed):
-            random.nodes.append(random.random())    # In this simulation, we only need to know how many nodes the node needs to, but in a real situation, we should know quantity an which nodes are
-        plan = {
-            'cpu_cores' = np.abs(averageNormalDistribution()),
-            'gpu_cores' = np.abs(averageNormalDistribution()),
-            'arm_cores' = np.abs(averageNormalDistribution()),
-            'get_data_other_nodes': random_nodes,
-            'data_load': random.uniform(0,1)
-        }
-        execution_plannings.append(plan)
+ ##   for i in range(0,N_execution_plannings):
+ #       n_nodes_needed = random.randint(0,10)    # 0 if we do not need data from other nodes
+ #       random_nodes = []
+ #       for j in range(0,n_nodes_needed):
+ #           random_nodes.append(random.random())    # In this simulation, we only need to know how many nodes the node needs to, but in a real situation, we should know quantity an which nodes are
+ #       plan = {
+ #           'cpu_cores' : np.abs(averageNormalDistribution()),
+ #           'gpu_cores' : np.abs(averageNormalDistribution()),
+ #           'arm_cores' : np.abs(averageNormalDistribution()),
+ #           'get_data_other_nodes': random_nodes,
+ #           'data_load': random.uniform(0,1)
+ #       }
+ #       execution_plannings.append(plan)
 
     # An instance of our problem
     problem = MOEAforbroker()
 
     # Some algorithms we can execute, in an array
-    algorithms = [NSGAIII(problem)]
+    algorithms = [NSGAII(problem)]
     # If we have an array of plannings, we should initialise a loop here, before loop of algorithms
     for alg in algorithms:
+        print(alg)
         alg.run(10000)
 
         optimal_solutions = alg.result
