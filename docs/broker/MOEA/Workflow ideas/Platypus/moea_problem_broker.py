@@ -39,7 +39,10 @@ class MOEAforbroker(Problem):
         # It is supposed 'values' a dictionary as it is inisialised in main function
         # Evaluation function is used to evaluate execution planning given
         t_exec, e_consumption = evaluate_function(values)
-
+        if t_exec <= 0.0:
+            t_exec = 1000           # I penalise some values
+        if e_consumption <= 0.0:
+            t_exec = 1000
         #  I put my objectives values in an array. They are values I want to minimise (?) YES
         solution.objectives[:] = [t_exec,e_consumption]
 
