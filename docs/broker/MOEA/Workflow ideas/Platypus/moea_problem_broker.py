@@ -1,4 +1,4 @@
-from platypus import NSGAII, Problem, Real
+from platypus import NSGAII,SPEA2,MOEAD,CMAES,OMOPSO,IBEA, Problem, Real   # Differential evolution algorithm? OMOPSO algorithm?
 import numpy as np
 import random
 
@@ -38,11 +38,10 @@ class MOEAforbroker(Problem):
         
         # It is supposed 'values' a dictionary as it is inisialised in main function
         # Evaluation function is used to evaluate execution planning given
-        res = evaluate_function(values)
-        t_exec,e_consumption = res
+        t_exec, e_consumption = evaluate_function(values)
 
         #  I put my objectives values in an array. They are values I want to minimise (?) YES
-        solution.objectives[:] = [t_exec[0],e_consumption[0]]
+        solution.objectives[:] = [t_exec,e_consumption]
 
 
 def averageNormalDistribution():
@@ -50,7 +49,7 @@ def averageNormalDistribution():
     variance = 1
     value = np.random.normal(loc=average,scale=variance,size=1)
 
-    return value
+    return value[0]
 
 # Auxiliar function in which time is got
 def getRandomTime():
@@ -114,7 +113,6 @@ def evaluate_function(values):
 #   - If get_data_other_nodes.isEmpty() then needed data will be within node.
 
 def getExecutionTimePlanning(cpu_cores,gpu_cores,arm_cores,get_data_other_nodes,node_load):
-    
     if cpu_cores != 0.0 and gpu_cores == 0.0 and arm_cores == 0.0:
         time = executionTimePlannedWithCPU(cpu_cores,get_data_other_nodes)
 
@@ -321,16 +319,19 @@ if __name__ == "__main__":
     problem = MOEAforbroker()
 
     # Some algorithms we can execute, in an array
-    algorithms = [NSGAII(problem)]
-    # If we have an array of plannings, we should initialise a loop here, before loop of algorithms
-    for alg in algorithms:
-        print(alg)
-        alg.run(10000)
+    algorithms = [NSGAII(problem), SPEA2(problem), MOEAD(problem), CMAES(problem), IBEA(problem)]
 
-        optimal_solutions = alg.result
-        print(alg)
-        for solution in optimal_solutions:
-            print("Execution time: ",solution.variables[0])
-            print("Energy consumption: ",solution.variables[1])
-            print("Objectives: ",solution.objectives)
-            print()
+    with open('soluciones_MOEAs.txt', 'w') as file:
+        for alg in algorithms:
+            file.write(str(alg) + "\n")
+            
+            alg.run(10000)
+
+            optimal_solutions = alg.result
+            for solution in optimal_solutions:
+                file.write("Execution time: " + str(solution.variables[0]) + "\n")
+                file.write("Energy consumption: " + str(solution.variables[1]) + "\n")
+                file.write("Objectives: " + str(solution.objectives) + "\n")
+                file.write("\n")
+
+            file.write("----\n")
