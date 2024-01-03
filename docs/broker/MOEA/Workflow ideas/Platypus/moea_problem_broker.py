@@ -125,6 +125,7 @@ def evaluate_function(values):
    # get_data_other_nodes = values[4:]           # List<int>. If get_data_other_nodes.is_empty(), then it is supposed all needed data is within the node
     get_data_other_nodes = []
 
+    # IT SHOULD BE GIVEN BY ANOTHER ALGORITHM, WHO KNOWS ABOUT OUR SYSTEM AND WHICH IS NEEDED IN EACH WSCLEAN FUNCTION
     N_nodes_need = random.randint(0,max_node_in_graph)
     id_my_node = random.randint(0,max_node_in_graph)        # Maybe node in which function is executed is not in the list of avaliable nodes
     for i in range(0,N_nodes_need):
@@ -168,107 +169,146 @@ def getExecutionTimePlanning(cpu_cores,gpu_cores,arm_cores,get_data_other_nodes,
 # Because I do not know if planned behaviour for CPU/ARM/GPU is correct, I repeat code. If CPU/ARM/GPU influences in other variables, there is not a problem. In other case, we can bind
 # this functions in a single function
 # For a simulation, I use `getRandomTime()`, which return random data which has a normal distribution
+
+# 1) Do I need data from other nodes?-->YES: For each node I get time spent in operations with other node (recursive call)
+#                                    -->NO: No time is spent in this operation
+# 2) Time spent with operations within node: It is a parallel program:
+#   2.1) I have all data I need within node--> I get all data I need depending on function (important because in this way I discriminate data storaged within node)
+#   2.2) I know what I must run, then I do that
+
 def executionTimePlannedWithCPU(cpu_cores,get_data_other_nodes):
     #Here I define an approach function to cpu time
-    # Firstly, supposing a parallel program, it is got transfer time, which process data from other nodes
-    tTransf = 0.0
-    for node_index in get_data_other_nodes:
-        tTransf = tTransf + getRandomTime()
-    tTransf_final = tTransf / (cpu_cores**p_CPU)
+        # Now, I do the same with transmission time
 
-    # Then I get data within node, if there is
-    tAccessData = getRandomTime()
+    t_i_j_final = 0.0
+    t_j_i_final = 0.0
+    time_other_nodes_final = 0.0
 
-    # Now, I do the same with transmission time
-    t_i_j = 0.0
-    for node_index in get_data_other_nodes:
-        t_i_j = t_i_j + getRandomTime()
+    if(len(get_data_other_nodes)>0):    # Only if data from other nodes is needed we have to consider this time
+        t_i_j=0.0
+        for node_index in get_data_other_nodes:
+            t_i_j = t_i_j + getTCommunication(-1,node_index)   # We should know index of current node
 
-    t_i_j_final = t_i_j
-    
-    t_j_i = 0.0
-    for node_index in get_data_other_nodes:
-        t_j_i = t_j_i + getRandomTime()
-    t_j_i_final = t_j_i
+        t_i_j_final = t_i_j
+        
+        time_other_nodes = 0.0
+        for node_index in get_data_other_nodes: #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            # We should use a function in which cpu_cores/arm_cores/gpu_cores for foreign node are indicated
+            # which node should be executed, and if it needs data from different nodes, it should be indicated too
+            time_other_nodes = time_other_nodes + getRandomTime()    # Replace `getRandomTime() with `getExecutionTimePlanning` (it is more complex, we do not know at first how many cores, which technology should be used,...)
+        time_other_nodes_final = time_other_nodes
 
-    # Lastly, if I need data from other nodes, I have to wait that time. We can model ir with a recursive function
-    time_other_nodes = 0.0
-    for node_index in get_data_other_nodes:
-        # We should use a function in which cpu_cores/arm_cores/gpu_cores for foreign node are indicated
-        # which node should be executed, and if it needs data from different nodes, it should be indicated too
-        time_other_nodes = time_other_nodes + getRandomTime()   # Replace `getRandomTime() with `getExecutionTimePlanning` (it is more complex, we do not know at first how many cores, which technology should be used,...)
-    time_other_nodes_final = time_other_nodes
+        t_j_i = 0.0
+        for node_index in get_data_other_nodes:
+            t_j_i = t_j_i + getTCommunication(node_index,-1)
+        t_j_i_final = t_j_i
+        
 
-    return (tTransf_final + t_i_j_final + t_j_i_final + time_other_nodes_final)
+    # We process data within node
+
+    # Then I get data within node. In this function we have data needed from other nodes
+    tAccessData =getTAccessData('wsclean -size 3072 3072 -scale 0.7amin -niter 10000 -mgain 0.8 -auto-threshold 3 obs.ms')
+    tProcessingData = getTProcessingData('wsclean -size 3072 3072 -scale 0.7amin -niter 10000 -mgain 0.8 -auto-threshold 3 obs.ms')
+
+    tExecutingFunction = (tAccessData+tProcessingData) / (cpu_cores**p_CPU)
+
+    return (tExecutingFunction + t_i_j_final + t_j_i_final + time_other_nodes_final)
 
 
 def executionTimePlannedWithGPU(gpu_cores,get_data_other_nodes):
     # The same with GPU time
-    #Here I define an approach function to gpu time
-    # Firstly, supposing a parallel program, it is got transfer time, which process data from other nodes
-    tTransf = 0.0
-    for node_index in get_data_other_nodes:
-        tTransf = tTransf + getRandomTime()
-    tTransf_final = tTransf / (gpu_cores**p_GPU)
-
-    # Then I get data within node, if there is
-    tAccessData = getRandomTime()
-
     # Now, I do the same with transmission time
-    t_i_j = 0.0
-    for node_index in get_data_other_nodes:
-        t_i_j = t_i_j + getRandomTime()
 
-    t_i_j_final = t_i_j
-    
-    t_j_i = 0.0
-    for node_index in get_data_other_nodes:
-        t_j_i = t_j_i + getRandomTime()
-    t_j_i_final = t_j_i
+    t_i_j_final = 0.0
+    t_j_i_final = 0.0
+    time_other_nodes_final = 0.0
 
-    # Lastly, if I need data from other nodes, I have to wait that time. We can model ir with a recursive function
-    time_other_nodes = 0.0
-    for node_index in get_data_other_nodes:
-        # We should use a function in which cpu_cores/arm_cores/gpu_cores for foreign node are indicated
-        # which node should be executed, and if it needs data from different nodes, it should be indicated too
-        time_other_nodes = time_other_nodes + getRandomTime()    # Replace `getRandomTime() with `getExecutionTimePlanning` (it is more complex, we do not know at first how many cores, which technology should be used,...)
-    time_other_nodes_final = time_other_nodes
+    if(len(get_data_other_nodes)>0):    # Only if data from other nodes is needed we have to consider this time
+        t_i_j=0.0
+        for node_index in get_data_other_nodes:
+            t_i_j = t_i_j + getTCommunication(-1,node_index)   # We should know index of current node
 
-    return (tTransf_final + t_i_j_final + t_j_i_final + time_other_nodes_final)
+        t_i_j_final = t_i_j
+        
+        time_other_nodes = 0.0
+        for node_index in get_data_other_nodes: #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            # We should use a function in which cpu_cores/arm_cores/gpu_cores for foreign node are indicated
+            # which node should be executed, and if it needs data from different nodes, it should be indicated too
+            time_other_nodes = time_other_nodes + getRandomTime()    # Replace `getRandomTime() with `getExecutionTimePlanning` (it is more complex, we do not know at first how many cores, which technology should be used,...)
+        time_other_nodes_final = time_other_nodes
+
+        t_j_i = 0.0
+        for node_index in get_data_other_nodes:
+            t_j_i = t_j_i + getTCommunication(node_index,-1)
+        t_j_i_final = t_j_i
+        
+
+    # We process data within node
+
+    # Then I get data within node. In this function we have data needed from other nodes
+    tAccessData =getTAccessData('wsclean -size 3072 3072 -scale 0.7amin -niter 10000 -mgain 0.8 -auto-threshold 3 obs.ms')
+    tProcessingData = getTProcessingData('wsclean -size 3072 3072 -scale 0.7amin -niter 10000 -mgain 0.8 -auto-threshold 3 obs.ms')
+
+    tExecutingFunction = (tAccessData+tProcessingData) / (gpu_cores**p_GPU)
+
+    return (tExecutingFunction + t_i_j_final + t_j_i_final + time_other_nodes_final)
+
 
 def executionTimePlannedWithARM(arm_cores,get_data_other_nodes):
     #Here I define an approach function to arm time
-    # Firstly, supposing a parallel program, it is got transfer time, which process data from other nodes
-    tTransf = 0.0
-    for node_index in get_data_other_nodes:
-        tTransf = tTransf + getRandomTime()
-    tTransf_final = tTransf / (arm_cores**p_ARM)
-
-    # Then I get data within node, if there is
-    tAccessData = getRandomTime()
 
     # Now, I do the same with transmission time
-    t_i_j = 0.0
-    for node_index in get_data_other_nodes:
-        t_i_j = t_i_j + getRandomTime()
 
-    t_i_j_final = t_i_j
-    
-    t_j_i = 0.0
-    for node_index in get_data_other_nodes:
-        t_j_i = t_j_i + getRandomTime()
-    t_j_i_final = t_j_i
+    t_i_j_final = 0.0
+    t_j_i_final = 0.0
+    time_other_nodes_final = 0.0
 
-    # Lastly, if I need data from other nodes, I have to wait that time. We can model ir with a recursive function
-    time_other_nodes = 0.0
-    for node_index in get_data_other_nodes:
-        # We should use a function in which cpu_cores/arm_cores/gpu_cores for foreign node are indicated
-        # which node should be executed, and if it needs data from different nodes, it should be indicated too
-        time_other_nodes = time_other_nodes + getRandomTime()    # Replace `getRandomTime() with `getExecutionTimePlanning` (it is more complex, we do not know at first how many cores, which technology should be used,...)
-    time_other_nodes_final = time_other_nodes
+    if(len(get_data_other_nodes)>0):    # Only if data from other nodes is needed we have to consider this time
+        t_i_j=0.0
+        for node_index in get_data_other_nodes:
+            t_i_j = t_i_j + getTCommunication(-1,node_index)   # We should know index of current node
 
-    return (tTransf_final + t_i_j_final + t_j_i_final + time_other_nodes_final)
+        t_i_j_final = t_i_j
+        
+        time_other_nodes = 0.0
+        for node_index in get_data_other_nodes: #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            # We should use a function in which cpu_cores/arm_cores/gpu_cores for foreign node are indicated
+            # which node should be executed, and if it needs data from different nodes, it should be indicated too
+            time_other_nodes = time_other_nodes + getRandomTime()    # Replace `getRandomTime() with `getExecutionTimePlanning` (it is more complex, we do not know at first how many cores, which technology should be used,...)
+        time_other_nodes_final = time_other_nodes
 
+        t_j_i = 0.0
+        for node_index in get_data_other_nodes:
+            t_j_i = t_j_i + getTCommunication(node_index,-1)
+        t_j_i_final = t_j_i
+        
+
+    # We process data within node
+
+    # Then I get data within node. In this function we have data needed from other nodes
+    tAccessData =getTAccessData('wsclean -size 3072 3072 -scale 0.7amin -niter 10000 -mgain 0.8 -auto-threshold 3 obs.ms')
+    tProcessingData = getTProcessingData('wsclean -size 3072 3072 -scale 0.7amin -niter 10000 -mgain 0.8 -auto-threshold 3 obs.ms')
+
+    tExecutingFunction = (tAccessData+tProcessingData) / (arm_cores**p_ARM)
+
+    return (tExecutingFunction + t_i_j_final + t_j_i_final + time_other_nodes_final)
+
+# Time spent getting data within node in which function is executed
+def getTAccessData(my_function):
+    # IMPLEMENTAR MODELO. ACCEDER A LOS DATOS
+    return None
+
+# Time spent processing data within node. Previously this data has been got
+def tProcessingData(my_function):
+    # IMPLEMENTAR MODELO. PROCESAR LOS DATOS QUE SE HAN OBTENIDO ANTES
+    return None
+
+# Time spent communicating with other node. It is a prototype, but distance_i_j and bandwith are not constants
+def tCommunication(node_i,node_j):
+    distance_i_j=10000  # m
+    bandwith = 50000   # MB/s
+
+    return (distance_i_j/bandswith)  # s
 # -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 #----------------------------------------------------------------- ENERGY CONSUMPTION MODULE ------------------------------------------------------------------------------------------------------
