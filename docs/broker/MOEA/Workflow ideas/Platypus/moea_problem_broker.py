@@ -1,6 +1,7 @@
-from platypus import NSGAII,SPEA2,MOEAD,CMAES,OMOPSO,IBEA, Problem, Real   # Differential evolution algorithm? OMOPSO algorithm?
+from platypus import NSGAII,SPEA2,MOEAD,CMAES,OMOPSO,IBEA, Problem, Real,Integer   # Differential evolution algorithm? OMOPSO algorithm?
 import numpy as np
 import random
+import matplotlib.pyplot as plt
 
 # For execution time, we use expression {1/(n_cores)^p}, where p depemds on hardware technology used, i.e, p_CPU < p_ARM < p_GPU. Justification is explained in https://github.com/AlvaroRodriguezGallardo/src-brokering/blob/main/docs/broker/MOEA/broker_optimisation_algorithm.pdf
 
@@ -22,15 +23,17 @@ class MOEAforbroker(Problem):
 
         # I define decision variables limits. Between 0 and 1. Near to 1 is a good option in the execution planning
         #self.types[:] = [Real(0,1)]*N_functions
-        self.types[:] = [Real(0,max_cpu_cores),Real(0,max_gpu_cores),Real(0,max_arm_cores)]   #Independent variables and their domain
+        self.types[:] = [Integer(0,max_cpu_cores),Integer(0,max_gpu_cores),Integer(0,max_arm_cores)]   #Independent variables and their domain
                                                         # Maybe can they only be positive?
-    #    N_nodes_need = random.randint(0, max_node_in_graph)  # Platypus cannot use a list for a decision variable, but we can do it manually, but max nodes in the graph are needed
-     #   for i in range(4,N_nodes_need+4):   # If N_nodes_need = 0, then this loop is not executed 
-      #          self.types.append(Integer(0,N_nodes_need))
     
+        # Some constraints are defined:  they can not be zero at the same time (1) and if one of them is positive, rest of them are zero (2)  (the last one is because of how is implemented our function)
+        # Platypus logic in manually implemented constraints: solution is valid if it returns a value <=0
+
+        self.constraints[:] = [not_zero_at_same_time,if_one_positive_rest_zero]
+
         # What do I want to? --> A minimization problem
         #self.directions[:] = [self.MINIMIZE] * N_functions
-        self.directions[:] = [Problem.MINIMIZE,Problem.MINIMIZE]    # Vector I want to get. Imagine this function F:R^5 --> R^2
+        self.directions[:] = [Problem.MINIMIZE,Problem.MINIMIZE]    # Vector I want to get. Imagine this function F:R^3 --> R^2
 
     def evaluate(self,solution):
         # I get values of decision variables
@@ -38,21 +41,49 @@ class MOEAforbroker(Problem):
         
         # It is supposed 'values' a dictionary as it is inisialised in main function
         # Evaluation function is used to evaluate execution planning given
-        t_exec, e_consumption, no_cpu,no_arm,no_gpu = evaluate_function(values)
-        if t_exec <= 0.0:
-            t_exec = 1000           # I penalise some values
-        if e_consumption <= 0.0:
-            e_consumption = 1000
+        t_exec, e_consumption = evaluate_function(values)
+        if t_exec<=0.0 or e_consumption<=0.0:   # I penalise if one of them is 0.0 --> in reality, it is not possible
+            t_exec = e_consumption = 1000
         #  I put my objectives values in an array. They are values I want to minimise (?) YES
-        if no_cpu:
-            solution.variables[0] = 0.0
-        if no_arm:
-            solution.variables[2] = 0.0
-        if no_gpu:
-            solution.variables[1] = 0.0
 
         solution.objectives[:] = [t_exec,e_consumption]
 
+#--------------------------------------------------------------------- DEFINING HERE SOME CONSTRAINTS ----------------------------------------------------------------------------------
+
+# It is the easiest way to prove if are zero or not at the same time (if yes, it returns 0.0). It could be useful because they are not negative numbers
+# Note: I have been studied a bit Platypus, and if constraints are defined manually, then it uses '<=0' if a solution is valid
+def not_zero_at_same_time(vars):
+    x,y,z = vars
+    t = x+y+z
+
+    if t>0:
+        return -1.0
+    else:
+        return 1.0
+
+# A solution is valid while only one of them is positive and rest of them are zero. At least one is positive because of the previous constraint
+def if_one_positive_rest_zero(vars):
+    x,y,z=vars
+    count_positive_var = 0
+    # Number of positive values
+    if x>0:
+        count_positive_var=count_positive_var+1
+    if y>0:
+        count_positive_var=count_positive_var+1
+    if z>0:
+        count_positive_var=count_positive_var+1
+    
+    # If only one of them is positive, we do not do nothing
+    if count_positive_var==1:
+        return -1.0
+    else:
+        return 1.0  # In other case, it is not a valid solution
+    
+
+
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+#--------------------------------------------------------------------- RANDOM VALUES FUNCTIONS ------------------------------------------------------------------------------------------
 
 def averageNormalDistribution():
     average = 0
@@ -72,11 +103,15 @@ def getRandomEnergy():
     # It models time, so we make sure it is a non negative float
     return np.abs(averageNormalDistribution())
 
+# -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------- EVALUATION FUNCTION -------------------------------------------------------------------------------------------------
 # Evaluation function
 # Some variables are needed for MOEA. 'values' is a dictionary with next fields:
 #   - CPU cores: How many cores are needed within proposed solution with CPU?  --> CPU is basical case--> float (we could want to use 1.5 CPUs)
 #   - GPU cores: How many cores are needed if it uses GPU? ---> double (we could want to use 1.5 GPUs)
 #   - ARM cores: How many cores are needed if it uses ARM? ---> double (ídem)
+# Other values are needed, but they are independent of broker 
 #   - get_data_other_nodes: Do I need data from different nodes? ---> List
 #   - node_load: Which is node_load in the last x days?--> float \in [0,1] 
 # Evaluation function receives a dictionary 'solution' which is the proposed one to the algorithm
@@ -99,27 +134,15 @@ def evaluate_function(values):
 
    # assert cpu_cores>0, "Specify how many cores you want to run in CPU"
     node_load = random.uniform(0.0,1.0)
-    assert 0.0<=node_load<=1.0, "node_load must be a float between 0.0 and 1.0"
-    no_cpu = False
-    no_gpu = False
-    no_arm = False
-    # I implement restrictions about cores. If cpu_cores > 0 then gpu_cores = arm_cores = 0. But they are real positive numbers, then randomly I will do that
-    which_hardware_used = random.randint(0,2)
-    if which_hardware_used == 0:
-        gpu_cores = arm_cores = 0.0
-        no_gpu = no_arm = True
-    if which_hardware_used == 1:
-        cpu_cores = arm_cores = 0.0
-        no_cpu = no_arm = True
-    if which_hardware_used == 2:
-        cpu_cores = gpu_cores = 0.0
-        no_cpu = no_gpu = True
 
     t_execution_planning = getExecutionTimePlanning(cpu_cores=cpu_cores,gpu_cores=gpu_cores,arm_cores=arm_cores,get_data_other_nodes=get_data_other_nodes,node_load=node_load)
     energy_consumption = getEnergyConsumptionPlanning(cpu_cores=cpu_cores,gpu_cores=gpu_cores,arm_cores=arm_cores,get_data_other_nodes=get_data_other_nodes,node_load=node_load)
  
-    return t_execution_planning,energy_consumption, no_cpu,no_arm,no_gpu
+    return t_execution_planning,energy_consumption
 
+# ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------- EXECUTION TIME MODULE ----------------------------------------------------------------------------------------
 # In this problem, it is supposed VARIABLES ARE INDEPENDENT, EVEN IF SOME SOLUTIONS CONSIDER THEM AS RANDOM VARIABLES
 
 # Some restrictions:
@@ -129,7 +152,7 @@ def evaluate_function(values):
 #   - If get_data_other_nodes.isEmpty() then needed data will be within node.
 
 def getExecutionTimePlanning(cpu_cores,gpu_cores,arm_cores,get_data_other_nodes,node_load):
-    time = 0.0
+    time=0.0
     if cpu_cores != 0.0 and gpu_cores == 0.0 and arm_cores == 0.0:
         time = executionTimePlannedWithCPU(cpu_cores,get_data_other_nodes)
 
@@ -246,12 +269,16 @@ def executionTimePlannedWithARM(arm_cores,get_data_other_nodes):
 
     return (tTransf_final + t_i_j_final + t_j_i_final + time_other_nodes_final)
 
+# -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+#----------------------------------------------------------------- ENERGY CONSUMPTION MODULE ------------------------------------------------------------------------------------------------------
+
 # Some restrictions:
 #   - If gpu_cores==0, then GPU will not be needed
 #   - If get_data_other_nodes.isEmpty() then needed data will be within node.
 
 def getEnergyConsumptionPlanning(cpu_cores,gpu_cores,arm_cores,get_data_other_nodes,node_load):
-    energy = 0.0
+    energy=0.0
     if cpu_cores != 0.0 and gpu_cores == 0.0 and arm_cores == 0.0:
         energy = energyPlannedWithCPU(cpu_cores,get_data_other_nodes)
     
@@ -311,6 +338,10 @@ def energyPlannedWithARM(arm_cores,get_data_other_nodes):
 
     return (EnConsumptionProcessing+EnConsTransmission+EnWaitingNode)
 
+# --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# ---------------------------------------------------------------------------- MAIN FUNCTION -------------------------------------------------------------------------------------------------
+
 if __name__ == "__main__":
     # IN THIS PROGRAM, IT IS SUPPOSED WE WANT TO RUN A FUNCTION IN A CERTAIN NODE
     # Here, do I initialize some random execution plans?
@@ -338,19 +369,33 @@ if __name__ == "__main__":
     # Some algorithms we can execute, in an array
    # algorithms = [NSGAII(problem), SPEA2(problem), MOEAD(problem), CMAES(problem), IBEA(problem)]
     algorithms = [NSGAII(problem)]
-    with open('soluciones_MOEAs.txt', 'w') as file:
-        for alg in algorithms:
-            file.write(str(alg) + "\n")
+    for alg in algorithms:
             
-            alg.run(10000)
+        alg.run(10000)
 
-            optimal_solutions = alg.result
-            for solution in optimal_solutions:
-                file.write("CPU cores: " + str(solution.variables[0]) + "\n")
-                file.write("ARM cores: " + str(solution.variables[2]) + "\n")
-                file.write("GPU cores: " + str(solution.variables[1]) + "\n")
-               # file.write("Node load: " + str(solution.variables[3]) + "\n")
-                file.write("Objectives: " + str(solution.objectives) + "\n")
-                file.write("\n")
+        optimal_solutions = alg.result
 
-            file.write("----\n")
+        objective_time = []   # First objective
+        objective_energy = []   # Second objective
+
+        for solution in optimal_solutions:  # I store every point of optimal solutions for algorithm
+            objective_time.append(solution.objectives[0])
+            objective_energy.append(solution.objectives[1])
+            print("Execution time: "+str(solution.objectives[0])+". Energy Consumption: "+str(solution.objectives[1]))
+
+        # Create graphics
+        fig,ax = plt.subplots()
+
+        # Writing points in graphic
+        ax.scatter(objective_time,objective_energy)
+
+        # Adding some specifications
+        ax.set_xlabel('Execution time')
+        ax.set_ylabel('Energy consumption')
+        ax.set_title(f'Optimal Solutions for {str(alg)}')
+
+        # Saving graphic
+        plt.savefig(f'{str(alg)}_optimal_solutions.png')
+
+
+# ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
