@@ -2,7 +2,12 @@ from platypus import NSGAII,SPEA2,MOEAD,CMAES,OMOPSO,IBEA, Problem, Real,Integer
 import numpy as np
 import random
 import matplotlib.pyplot as plt
+import sys # Getting function
+import time
+import subprocess
+import logging
 
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s') 
 # For execution time, we use expression {1/(n_cores)^p}, where p depemds on hardware technology used, i.e, p_CPU < p_ARM < p_GPU. Justification is explained in https://github.com/AlvaroRodriguezGallardo/src-brokering/blob/main/docs/broker/MOEA/broker_optimisation_algorithm.pdf
 
 # It is an example for simulation. It should be chosen using experiments with real data
@@ -17,7 +22,12 @@ max_arm_cores = 10
 max_node_in_graph = 40
                                 
 class MOEAforbroker(Problem):
-    def __init__(self, N_functions_tuplas=2,P_decision_var=3):
+    #list_of_functions = []
+
+    def __init__(self, functions, N_functions_tuplas=2,P_decision_var=3):
+        # Functions I want to run
+        self.list_of_functions = functions
+
         # I establish objectives number (N functions) and how many decision variables there are
         super(MOEAforbroker,self).__init__(P_decision_var,N_functions_tuplas)
 
@@ -38,10 +48,15 @@ class MOEAforbroker(Problem):
     def evaluate(self,solution):
         # I get values of decision variables
         values = solution.variables
-        
+        t_exec = e_consumption = 0.0
         # It is supposed 'values' a dictionary as it is inisialised in main function
         # Evaluation function is used to evaluate execution planning given
-        t_exec, e_consumption = evaluate_function(values)
+
+        for func in self.list_of_functions:
+            t_for_f,e_for_f = evaluate_function(values,func)
+            t_exec = t_exec + t_for_f
+            e_consumption = e_consumption + e_for_f
+
         if t_exec<=0.0 or e_consumption<=0.0:   # I penalise if one of them is 0.0 --> in reality, it is not possible
             t_exec = e_consumption = 1000
         #  I put my objectives values in an array. They are values I want to minimise (?) YES
@@ -116,7 +131,7 @@ def getRandomEnergy():
 #   - node_load: Which is node_load in the last x days?--> float \in [0,1] 
 # Evaluation function receives a dictionary 'solution' which is the proposed one to the algorithm
 
-def evaluate_function(values):
+def evaluate_function(values,my_function):
     cpu_cores = values[0]                         # double
     gpu_cores = values[1]                         # double. If gpu_cores==0, then it is supposed GPU is not needed
     arm_cores = values[2]                             # double
@@ -132,6 +147,9 @@ def evaluate_function(values):
         id_node = random.randint(0,N_nodes_need)
         if id_node != id_my_node:
             get_data_other_nodes.append(id_node)
+    # or if I want to execute 'my_function', get dependencies
+
+
 
    # assert cpu_cores>0, "Specify how many cores you want to run in CPU"
     node_load = random.uniform(0.0,1.0)
@@ -155,14 +173,19 @@ def evaluate_function(values):
 def getExecutionTimePlanning(cpu_cores,gpu_cores,arm_cores,get_data_other_nodes,node_load):
     time=0.0
     if cpu_cores != 0.0 and gpu_cores == 0.0 and arm_cores == 0.0:
+        logging.info("Execution time with CPU. Cores: "+str(cpu_cores)+". Dependencies: "+str(get_data_other_nodes))
         time = executionTimePlannedWithCPU(cpu_cores,get_data_other_nodes)
 
     if cpu_cores == 0.0 and gpu_cores != 0.0 and arm_cores == 0.0:
+        logging.info("Execution time with GPU. Cores: "+str(gpu_cores)+". Dependencies: "+str(get_data_other_nodes))
         time = executionTimePlannedWithGPU(gpu_cores,get_data_other_nodes)
 
     if cpu_cores == 0.0 and gpu_cores == 0.0 and arm_cores != 0.0:
+        logging.info("Execution time with ARM. Cores: "+str(arm_cores)+". Dependencies: "+str(get_data_other_nodes))
         time = executionTimePlannedWithARM(arm_cores,get_data_other_nodes)
 
+    logging.info("Node load: "+str(node_load))
+    logging.info("Total execution time depending on node_load is "+str((1.0+node_load)*time))
     return (1.0+node_load)*time
 
 
@@ -295,19 +318,29 @@ def executionTimePlannedWithARM(arm_cores,get_data_other_nodes):
 
 # Time spent getting data within node in which function is executed
 def getTAccessData(my_function):
-    # IMPLEMENTAR MODELO. ACCEDER A LOS DATOS
+    # IMPLEMENTAR MODELO. ACCEDER A LOS DATOS. SE SUPONEN TODOS LOS DAROS NECESARIOS DENTRO DEL NODO
     return None
 
 # Time spent processing data within node. Previously this data has been got
 def tProcessingData(my_function):
-    # IMPLEMENTAR MODELO. PROCESAR LOS DATOS QUE SE HAN OBTENIDO ANTES
-    return None
+
+    init = time.time()
+    # Aquí se ejecuta 'my_function'. Se puede hacer porque todos los datos están a mano, accesibles dentro del nodo
+    try:
+        subprocess.check_output(my_function, shell=True, text=True)
+    except subprocess.CalledProcessError as e:
+        logging.error("Error in tProcessingData: "+str(e))
+
+    end = time.time()
+    logging.info("Function +"str(my_function)+" has been processed")
+
+    return (end-init)
 
 # Time spent communicating with other node. It is a prototype, but distance_i_j and bandwith are not constants
 def tCommunication(node_i,node_j):
     distance_i_j=10000  # m
     bandwith = 50000   # MB/s
-
+    logging.info("Communication time from node "+str(node_i)+" to "+str(node_j)+" is "+str(distance_i_j/bandswith))
     return (distance_i_j/bandswith)  # s
 # -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -320,14 +353,19 @@ def tCommunication(node_i,node_j):
 def getEnergyConsumptionPlanning(cpu_cores,gpu_cores,arm_cores,get_data_other_nodes,node_load):
     energy=0.0
     if cpu_cores != 0.0 and gpu_cores == 0.0 and arm_cores == 0.0:
+        logging.info("Energy planned with CPU. Cores: "+str(cpu_cores)+". Dependencies: "+str(get_data_other_nodes))
         energy = energyPlannedWithCPU(cpu_cores,get_data_other_nodes)
     
     if cpu_cores == 0.0 and gpu_cores != 0.0 and arm_cores == 0.0:
+        logging.info("Energy planned with GPU. Cores: "+str(gpu_cores)+". Dependencies: "+str(get_data_other_nodes))
         energy = energyPlannedWithGPU(gpu_cores,get_data_other_nodes)
    
     if cpu_cores == 0.0 and gpu_cores == 0.0 and arm_cores != 0.0:
+        logging.info("Energy planned with ARM. Cores: "+str(arm_cores)+". Dependencies: "+str(get_data_other_nodes))
         energy = energyPlannedWithARM(arm_cores,get_data_other_nodes)
 
+    logging.info("Node load: "+str(node_load))
+    logging.info("Total energy consumption depending on node_load is "+str((1.0+node_load)*energy))
     return (1.0+node_load)*energy
 
 
@@ -340,8 +378,8 @@ def energyPlannedWithCPU(cpu_cores,get_data_other_nodes):
         # While this loop is running, EnWaitingNode should increase
         EnConsTransmission = EnConsTransmission + getRandomEnergy()
         # Here this thread should be waiting to another thread work
-        EnWaitingNode = EnWaitingNode + getRandomEnergy()   # It could be modelised with a semaphore or monitor
-        # IF WE SHOULD TAKE INTO ACCOUNT ENERGY IN OTHER NODE, WE SHOULD DO IT HERE
+        EnWaitingNode = EnWaitingNode + getRandomEnergy()   # It could be modelised with a semaphore or monitor. IT DEPEND ON EXECUTION TIME IN THE FOREIGN NODE
+        # IF WE SHOULD TAKE INTO ACCOUNT ENERGY IN OTHER NODE, WE SHOULD DO IT HERE.
 
     EnConsumptionProcessing = getRandomEnergy() * (cpu_cores**p_CPU)
 
@@ -402,8 +440,19 @@ if __name__ == "__main__":
  #           'data_load': random.uniform(0,1)
  #       }
  #       execution_plannings.append(plan)
+    # First function is got
+    wsclean_functions = []
+
+    if len(sys.argv) > 1:
+        for function in sys.argv[1:]:
+            wsclean_functions.append(function)
+    else:
+        print("At least one function must be given")
+
+    assert(len(wsclean_functions)>0)
 
     # An instance of our problem
+
     problem = MOEAforbroker()
 
     # Some algorithms we can execute, in an array
