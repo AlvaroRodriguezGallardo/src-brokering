@@ -1,0 +1,35 @@
+[
+    {
+        "CPU": 3,
+        "GPU": 2,
+        "ARM": 0,
+        "LOAD": 0.9,
+        "CONNECTIONS": {"2": 10},
+        "DATA": ["D1", "D2", "D3"]
+    },
+    {
+        "CPU": 3,
+        "GPU": 2,
+        "ARM": 3,
+        "LOAD": 0.5,
+        "CONNECTIONS": {"1": 20, "3": 5},
+        "DATA": ["D2", "D6"]
+    },
+    {
+        "CPU": 3,
+        "GPU": 10,
+        "ARM": 5,
+        "LOAD": 1.0,
+        "CONNECTIONS": {"2": 6, "4": 2},
+        "DATA": ["D1", "D5"]
+    },
+    {
+        "CPU": 8,
+        "GPU": 0,
+        "ARM": 0,
+        "LOAD": 0.0,
+        "CONNECTIONS": {"3": 30},
+        "DATA": ["D4"]
+    }
+]
+
