@@ -33,8 +33,25 @@ class MOEAforbroker(Problem):
         super(MOEAforbroker,self).__init__(P_decision_var,N_functions_tuplas)
 
         # I define decision variables limits. Between 0 and 1. Near to 1 is a good option in the execution planning
+            # Tres elementos por cada nodo. Para saber de qué nodo son, tal como está planteado el problema, dado un elem de self.types, 
+            # se cumple que posicion(elem)//3 + 1 es el id del nodo. Pongamos un ejemplo:
+            # Si posicion(elem)= 2 --> 2//3 + 1 = 0+1 = 1 -->nodo 1
+            # Si posicion(elem) = 10 --> 10//3 + 1 = 3+1=4 --> nodo 4
+            # Si posicion(elem) =100 --> 100//3 + 1 =33+1 = 34 --> nodo 34
+            # Creo que se puede probar por inducción que N//3 + 1 es el nodo correspondiente. Se puede generalzar a N//P_decision_var + 1 para P_decision_var > 1
+            # Es cierto para N=0, pues 0//3 + 1 = 1 -->nodo 1
+            # Supuesto cierto que lo es N//3 +1, veamos (N+1)//3 +1
+            # (N+1)//3 + 1 = N//3 + 1//3 + 1 = N//3 +0 + 1 = N//3 + 1, qué es cierto por hipótesis
+            # En consecuencia, si quiero acceder a los cores de cpu del nodo 1, sería self.types[0], del nodo 2 self.types[3],..., del nodo N self.types[3(N-1)]
+            # Para los cores de gpu del nodo N, self.types[3(N-1) + 1]
+            # Para los cores de arm del nodo N, self.types[3(N-1) + 2]
+            # Se puede generalizar a P variables de decisión, M nodos --> hacemos el sistema escalable, y si se implementa bien, podemos añadir y quitar variables
+            # de decisión sin problema
+        self.types.clear()
         for i in range(max_node_in_graph):
-            self.types[:] = [Integer(0,max_cpu_cores),Integer(0,max_gpu_cores),Integer(0,max_arm_cores)]
+            self.types.append(Integer(0, max_cpus_in_each_node[i]))
+            self.types.append(Integer(0, max_gpus_in_each_node[i]))
+            self.types.append(Integer(0, max_arms_in_each_node[i]))
     
         # Some constraints are defined:  they can not be zero at the same time (1) and if one of them is positive, rest of them are zero (2)  (the last one is because of how is implemented our function)
         # Platypus logic in manually implemented constraints: solution is valid if it returns a value <=0
@@ -139,6 +156,7 @@ def getRandomEnergy():
 #   - node_load: Which is node_load in the last x days?--> float \in [0,1] 
 # Evaluation function receives a dictionary 'solution' which is the proposed one to the algorithm
 
+# EXTENDER FUNCIÓN OBJETIVO A P VARIABLES Y M NODOS
 def evaluate_function(values,my_function):
     cpu_cores = values[0]                         # double
     gpu_cores = values[1]                         # double. If gpu_cores==0, then it is supposed GPU is not needed
