@@ -1,13 +1,17 @@
 [
     {
+    	"ID": 1,
+    	"NAME": "Spain",
         "CPU": 3,
         "GPU": 2,
         "ARM": 0,
         "LOAD": 0.9,
-        "CONNECTIONS": {"2": 10},
+        "CONNECTIONS": {"2": 10},		# Propuesta: {clave:valor}={id,ping}   . Cambiar a {clave:valor}={id,[]}
         "DATA": ["D1", "D2", "D3"]
     },
     {
+    	"ID": 2,
+    	"NAME": "Italy",
         "CPU": 3,
         "GPU": 2,
         "ARM": 3,
@@ -16,6 +20,8 @@
         "DATA": ["D2", "D6"]
     },
     {
+    	"ID": 3,
+    	"NAME": "Japan",
         "CPU": 3,
         "GPU": 10,
         "ARM": 5,
@@ -24,6 +30,8 @@
         "DATA": ["D1", "D5"]
     },
     {
+    	"ID": 4,
+    	"NAME": "Switzerland",
         "CPU": 8,
         "GPU": 0,
         "ARM": 0,
@@ -33,3 +41,4 @@
     }
 ]
 
+# Lo normal es todos conectados con todos, pero puedo haber un nodo que caiga, entonces hay que replanificar. Si no está directamente conectado, tomar camino más corto (Dijkstra) o tomar la media y tomar la que más rápido lo envíe.
