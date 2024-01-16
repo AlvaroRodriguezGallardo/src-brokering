@@ -93,36 +93,42 @@ class MOEAforbroker(Problem):
 # It is the easiest way to prove if are zero or not at the same time (if yes, it returns 0.0). It could be useful because they are not negative numbers
 # Note: I have been studied a bit Platypus, and if constraints are defined manually, then it uses '<=0' if a solution is valid
 def not_zero_at_same_time(vars):
-    x,y,z = vars
-    t = x+y+z
+    # Supongo 3 variables de decisión por nodo
+    for i in range(0,len(vars),3)
+        aux = vars[i] + vars[i+1]+vars[i+2]
+        if aux == 0:
+            return 1.0
 
-    if t>0:
-        return -1.0
-    else:
-        return 1.0
+    return -1.0
 
 # A solution is valid while only one of them is positive and rest of them are zero. At least one is positive because of the previous constraint
 def if_one_positive_rest_zero(vars):
-    x,y,z=vars
-    count_positive_var = 0
-    # Number of positive values
-    if x>0:
-        count_positive_var=count_positive_var+1
-    if y>0:
-        count_positive_var=count_positive_var+1
-    if z>0:
-        count_positive_var=count_positive_var+1
+    # Supongo 3 variables de decisión por nodo
+    for i in range(0,len(vars),3):
+        count_positive_var = 0
+        # Number of positive values
+        if vars[i]>0:
+            count_positive_var=count_positive_var+1
+        if vars[i+1]>0:
+            count_positive_var=count_positive_var+1
+        if vars[i+2]>0:
+            count_positive_var=count_positive_var+1
     
     # If only one of them is positive, we do not do nothing
-    if count_positive_var==1:
-        return -1.0
-    else:
-        return 1.0  # In other case, it is not a valid solution
+        if count_positive_var>1:
+            return 1.0
+
+    return -1.0
     
 
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+#-------------------------------------------------------------------- OTHER AUXILIAR FUNCTIONS ------------------------------------------------------------------------------------------
 
+def obtenerDeNodoNVariableK(lista,N_nodo,K_variable):
+    return lista[P_variables_decision*(N_nodo-1) + (K_variable-1)]
+
+#----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #--------------------------------------------------------------------- RANDOM VALUES FUNCTIONS ------------------------------------------------------------------------------------------
 
 def averageNormalDistribution():
@@ -200,15 +206,15 @@ def getExecutionTimePlanning(cpu_cores,gpu_cores,arm_cores,get_data_other_nodes,
     time=0.0
     if cpu_cores != 0.0 and gpu_cores == 0.0 and arm_cores == 0.0:
         logging.info("Execution time with CPU. Cores: "+str(cpu_cores)+". Dependencies: "+str(get_data_other_nodes))
-        time = executionTimePlannedWithCPU(cpu_cores,get_data_other_nodes)
+        time = executionTimePlanned(cpu_cores,get_data_other_nodes,p_CPU)
 
     if cpu_cores == 0.0 and gpu_cores != 0.0 and arm_cores == 0.0:
         logging.info("Execution time with GPU. Cores: "+str(gpu_cores)+". Dependencies: "+str(get_data_other_nodes))
-        time = executionTimePlannedWithGPU(gpu_cores,get_data_other_nodes)
+        time = executionTimePlanned(gpu_cores,get_data_other_nodes,p_GPU)
 
     if cpu_cores == 0.0 and gpu_cores == 0.0 and arm_cores != 0.0:
         logging.info("Execution time with ARM. Cores: "+str(arm_cores)+". Dependencies: "+str(get_data_other_nodes))
-        time = executionTimePlannedWithARM(arm_cores,get_data_other_nodes)
+        time = executionTimePlanned(arm_cores,get_data_other_nodes,p_ARM)
 
     logging.info("Node load: "+str(node_load))
     logging.info("Total execution time depending on node_load is "+str((1.0+node_load)*time))
@@ -225,7 +231,7 @@ def getExecutionTimePlanning(cpu_cores,gpu_cores,arm_cores,get_data_other_nodes,
 #   2.1) I have all data I need within node--> I get all data I need depending on function (important because in this way I discriminate data storaged within node)
 #   2.2) I know what I must run, then I do that
 
-def executionTimePlannedWithCPU(cpu_cores,get_data_other_nodes):
+def executionTimePlanned(cpu_cores,get_data_other_nodes,p_hardware):
     #Here I define an approach function to cpu time
         # Now, I do the same with transmission time
 
@@ -259,86 +265,7 @@ def executionTimePlannedWithCPU(cpu_cores,get_data_other_nodes):
     tAccessData =getTAccessData('wsclean -size 3072 3072 -scale 0.7amin -niter 10000 -mgain 0.8 -auto-threshold 3 obs.ms')
     tProcessingData = getTProcessingData('wsclean -size 3072 3072 -scale 0.7amin -niter 10000 -mgain 0.8 -auto-threshold 3 obs.ms')
 
-    tExecutingFunction = (tAccessData+tProcessingData) / (cpu_cores**p_CPU)
-
-    return (tExecutingFunction + t_i_j_final + t_j_i_final + time_other_nodes_final)
-
-
-def executionTimePlannedWithGPU(gpu_cores,get_data_other_nodes):
-    # The same with GPU time
-    # Now, I do the same with transmission time
-
-    t_i_j_final = 0.0
-    t_j_i_final = 0.0
-    time_other_nodes_final = 0.0
-
-    if(len(get_data_other_nodes)>0):    # Only if data from other nodes is needed we have to consider this time
-        t_i_j=0.0
-        for node_index in get_data_other_nodes:
-            t_i_j = t_i_j + getTCommunication(-1,node_index)   # We should know index of current node
-
-        t_i_j_final = t_i_j
-        
-        time_other_nodes = 0.0
-        for node_index in get_data_other_nodes: #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            # We should use a function in which cpu_cores/arm_cores/gpu_cores for foreign node are indicated
-            # which node should be executed, and if it needs data from different nodes, it should be indicated too
-            time_other_nodes = time_other_nodes + getRandomTime()    # Replace `getRandomTime() with `getExecutionTimePlanning` (it is more complex, we do not know at first how many cores, which technology should be used,...)
-        time_other_nodes_final = time_other_nodes
-
-        t_j_i = 0.0
-        for node_index in get_data_other_nodes:
-            t_j_i = t_j_i + getTCommunication(node_index,-1)
-        t_j_i_final = t_j_i
-        
-
-    # We process data within node
-
-    # Then I get data within node. In this function we have data needed from other nodes
-    tAccessData =getTAccessData('wsclean -size 3072 3072 -scale 0.7amin -niter 10000 -mgain 0.8 -auto-threshold 3 obs.ms')
-    tProcessingData = getTProcessingData('wsclean -size 3072 3072 -scale 0.7amin -niter 10000 -mgain 0.8 -auto-threshold 3 obs.ms')
-
-    tExecutingFunction = (tAccessData+tProcessingData) / (gpu_cores**p_GPU)
-
-    return (tExecutingFunction + t_i_j_final + t_j_i_final + time_other_nodes_final)
-
-
-def executionTimePlannedWithARM(arm_cores,get_data_other_nodes):
-    #Here I define an approach function to arm time
-
-    # Now, I do the same with transmission time
-
-    t_i_j_final = 0.0
-    t_j_i_final = 0.0
-    time_other_nodes_final = 0.0
-
-    if(len(get_data_other_nodes)>0):    # Only if data from other nodes is needed we have to consider this time
-        t_i_j=0.0
-        for node_index in get_data_other_nodes:
-            t_i_j = t_i_j + getTCommunication(-1,node_index)   # We should know index of current node
-
-        t_i_j_final = t_i_j
-        
-        time_other_nodes = 0.0
-        for node_index in get_data_other_nodes: #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            # We should use a function in which cpu_cores/arm_cores/gpu_cores for foreign node are indicated
-            # which node should be executed, and if it needs data from different nodes, it should be indicated too
-            time_other_nodes = time_other_nodes + getRandomTime()    # Replace `getRandomTime() with `getExecutionTimePlanning` (it is more complex, we do not know at first how many cores, which technology should be used,...)
-        time_other_nodes_final = time_other_nodes
-
-        t_j_i = 0.0
-        for node_index in get_data_other_nodes:
-            t_j_i = t_j_i + getTCommunication(node_index,-1)
-        t_j_i_final = t_j_i
-        
-
-    # We process data within node
-
-    # Then I get data within node. In this function we have data needed from other nodes
-    tAccessData =getTAccessData('wsclean -size 3072 3072 -scale 0.7amin -niter 10000 -mgain 0.8 -auto-threshold 3 obs.ms')
-    tProcessingData = getTProcessingData('wsclean -size 3072 3072 -scale 0.7amin -niter 10000 -mgain 0.8 -auto-threshold 3 obs.ms')
-
-    tExecutingFunction = (tAccessData+tProcessingData) / (arm_cores**p_ARM)
+    tExecutingFunction = (tAccessData+tProcessingData) / (cpu_cores**p_hardware)
 
     return (tExecutingFunction + t_i_j_final + t_j_i_final + time_other_nodes_final)
 
@@ -380,22 +307,22 @@ def getEnergyConsumptionPlanning(cpu_cores,gpu_cores,arm_cores,get_data_other_no
     energy=0.0
     if cpu_cores != 0.0 and gpu_cores == 0.0 and arm_cores == 0.0:
         logging.info("Energy planned with CPU. Cores: "+str(cpu_cores)+". Dependencies: "+str(get_data_other_nodes))
-        energy = energyPlannedWithCPU(cpu_cores,get_data_other_nodes)
+        energy = energyPlanned(cpu_cores,get_data_other_nodes,p_CPU)
     
     if cpu_cores == 0.0 and gpu_cores != 0.0 and arm_cores == 0.0:
         logging.info("Energy planned with GPU. Cores: "+str(gpu_cores)+". Dependencies: "+str(get_data_other_nodes))
-        energy = energyPlannedWithGPU(gpu_cores,get_data_other_nodes)
+        energy = energyPlanned(gpu_cores,get_data_other_nodes,p_GPU)
    
     if cpu_cores == 0.0 and gpu_cores == 0.0 and arm_cores != 0.0:
         logging.info("Energy planned with ARM. Cores: "+str(arm_cores)+". Dependencies: "+str(get_data_other_nodes))
-        energy = energyPlannedWithARM(arm_cores,get_data_other_nodes)
+        energy = energyPlanned(arm_cores,get_data_other_nodes,p_ARM)
 
     logging.info("Node load: "+str(node_load))
     logging.info("Total energy consumption depending on node_load is "+str((1.0+node_load)*energy))
     return (1.0+node_load)*energy
 
 
-def energyPlannedWithCPU(cpu_cores,get_data_other_nodes):
+def energyPlanned(cpu_cores,get_data_other_nodes,p_hardware):
     # The same but energy with CPU
     EnWaitingNode = 0.0
     EnConsTransmission = 0.0
@@ -407,38 +334,7 @@ def energyPlannedWithCPU(cpu_cores,get_data_other_nodes):
         EnWaitingNode = EnWaitingNode + getRandomEnergy()   # It could be modelised with a semaphore or monitor. IT DEPEND ON EXECUTION TIME IN THE FOREIGN NODE
         # IF WE SHOULD TAKE INTO ACCOUNT ENERGY IN OTHER NODE, WE SHOULD DO IT HERE.
 
-    EnConsumptionProcessing = getRandomEnergy() * (cpu_cores**p_CPU)
-
-    return (EnConsumptionProcessing+EnConsTransmission+EnWaitingNode)
-
-def energyPlannedWithGPU(gpu_cores,get_data_other_nodes):
-    # The same as before with GPU
-    EnWaitingNode = 0.0
-    EnConsTransmission = 0.0
-
-    for node in get_data_other_nodes:
-        # While this loop is running, EnWaitingNode should increase
-        EnConsTransmission = EnConsTransmission + getRandomEnergy()
-        # Here this thread should be waiting to another thread work
-        EnWaitingNode = EnWaitingNode + getRandomEnergy()   # It could be modelised with a semaphore or monitor
-        # IF WE SHOULD TAKE INTO ACCOUNT ENERGY IN OTHER NODE, WE SHOULD DO IT HERE WITH RECURSIVITY
-
-    EnConsumptionProcessing = getRandomEnergy() * (gpu_cores**p_GPU)
-
-    return (EnConsumptionProcessing+EnConsTransmission+EnWaitingNode)
-
-def energyPlannedWithARM(arm_cores,get_data_other_nodes):
-    EnWaitingNode = 0.0
-    EnConsTransmission = 0.0
-
-    for node in get_data_other_nodes:
-        # While this loop is running, EnWaitingNode should increase
-        EnConsTransmission = EnConsTransmission + getRandomEnergy()
-        # Here this thread should be waiting to another thread work
-        EnWaitingNode = EnWaitingNode + getRandomEnergy()   # It could be modelised with a semaphore or monitor
-        # IF WE SHOULD TAKE INTO ACCOUNT ENERGY IN OTHER NODE, WE SHOULD DO IT HERE
-
-    EnConsumptionProcessing = getRandomEnergy() * (arm_cores**p_ARM)
+    EnConsumptionProcessing = getRandomEnergy() * (cpu_cores**p_hardware)
 
     return (EnConsumptionProcessing+EnConsTransmission+EnWaitingNode)
 
