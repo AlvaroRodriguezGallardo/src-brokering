@@ -48,16 +48,17 @@ class MOEAforbroker(Problem):
             # Se puede generalizar a P variables de decisión, M nodos --> hacemos el sistema escalable, y si se implementa bien, podemos añadir y quitar variables
             # de decisión sin problema
         self.types.clear()
+        self.types.append(Integer(1,max_node_in_graph))
         for i in range(max_node_in_graph):
-            self.types.append(Integer(0, max_cpus_in_each_node[i]))
+            self.types.append(Integer(0, max_cpus_in_each_node[i]))     # En vez de "cierto porcentaje de", usamos como plan de ejecución el número de cores correspondiente a ese porcentaje
             self.types.append(Integer(0, max_gpus_in_each_node[i]))
             self.types.append(Integer(0, max_arms_in_each_node[i]))
     
         # Some constraints are defined:  they can not be zero at the same time (1) and if one of them is positive, rest of them are zero (2)  (the last one is because of how is implemented our function)
         # Platypus logic in manually implemented constraints: solution is valid if it returns a value <=0
-
-        self.constraints[:] = [not_zero_at_same_time,if_one_positive_rest_zero]
-
+                                                                                #*******************************************************************************************************************
+        self.constraints[:] = [not_zero_at_same_time] #*********** NOTA: Puede haber propuestas en que un nodo use CPU y GPU (ejemplo) según cierto porcentaje, así que hay que cambiar esto último*******
+                                                                                #*********************************************************************************************************************
         # What do I want to? --> A minimization problem
         #self.directions[:] = [self.MINIMIZE] * N_functions
         self.directions[:] = [Problem.MINIMIZE,Problem.MINIMIZE]    # Vector I want to get. Imagine this function F:R^3 --> R^2
@@ -128,6 +129,55 @@ def if_one_positive_rest_zero(vars):
 def obtenerDeNodoNVariableK(lista,N_nodo,K_variable):
     return lista[P_variables_decision*(N_nodo-1) + (K_variable-1)]
 
+# Let an execution planning in a node, with a 3-upla (cpu_cores,gpu_cores,arm_cores). It is supposed an uniform distribution
+
+def inferredTimeOnNumberOfCores(time,cpu_cores,gpu_cores,arm_cores):
+    total_cores = cpu_cores+gpu_cores+arm_cores
+
+    distribution_cpu = (1.0)*cpu_cores/total_cores
+    distribution_gpu = (1.0)*gpu_cores/total_cores
+    distribution_arm = (1.0)*arm_cores/total_cores
+
+    time_cpu = (1.0/(distribution_cpu)**p_CPU) * time
+    time_gpu = (1.0/(distribution_gpu)**p_GPU) * time
+    time_arm = (1.0/(distribution_arm)**p_ARM) * time
+
+    return (time_cpu+time_gpu+time_arm)
+
+def inferredEnergyOnNumberOfCores(energy,cpu_cores,gpu_cores,arm_cores):
+    total_cores = cpu_cores+gpu_cores+arm_cores
+
+    distribution_cpu = (1.0)*cpu_cores/total_cores
+    distribution_gpu = (1.0)*gpu_cores/total_cores
+    distribution_arm = (1.0)*arm_cores/total_cores
+
+    energy_cpu = (distribution_cpu**p_CPU) * energy
+    energy_gpu = (distribution_gpu**p_GPU) * energy
+    energy_arm = (distribution_arm**p_ARM) * energy
+
+    return (energy_cpu+energy_gpu+energy_arm)
+
+def getDataNeededForAFunctionWithinANode(id_nodo,function):
+    # ONLY FOR TESTING, NOT A FINAL IMPLEMENTATION
+    d_needed = []
+    n_data_blocks = 10
+    max_neded = random.randint(0,5)
+
+    for i in range(max_neded):
+        p = random.randint(1,n_data_blocks)
+        if p != id_nodo
+            d_needed.append("D"+str(p))
+
+    return d_needed     # RETURNING A POINTER !!!!
+
+def data_block_within_node_i(node_i,data_block):
+    data_in_node_i = data_avaliable[node_i-1]
+
+    for p in data_in_node_i:
+        if p == data_block:
+            return True
+    return False
+
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #--------------------------------------------------------------------- RANDOM VALUES FUNCTIONS ------------------------------------------------------------------------------------------
 
@@ -164,30 +214,20 @@ def getRandomEnergy():
 
 # EXTENDER FUNCIÓN OBJETIVO A P VARIABLES Y M NODOS
 def evaluate_function(values,my_function):
-    cpu_cores = values[0]                         # double
-    gpu_cores = values[1]                         # double. If gpu_cores==0, then it is supposed GPU is not needed
-    arm_cores = values[2]                             # double
- #   node_load = values[3]                         # Float \in [0,1]
+    id_nodo = values[0]
+    my_planning = values[1:]
+    cpu_cores = obtenerDeNodoNVariableK(my_planning,id_nodo,1)                         # double
+    gpu_cores = obtenerDeNodoNVariableK(my_planning,id_nodo,2)                        # double. If gpu_cores==0, then it is supposed GPU is not needed
+    arm_cores = obtenerDeNodoNVariableK(my_planning,id_nodo,3)                             # double
 
-   # get_data_other_nodes = values[4:]           # List<int>. If get_data_other_nodes.is_empty(), then it is supposed all needed data is within the node
-    get_data_other_nodes = []
-
-    # IT SHOULD BE GIVEN BY ANOTHER ALGORITHM, WHO KNOWS ABOUT OUR SYSTEM AND WHICH IS NEEDED IN EACH WSCLEAN FUNCTION
-    N_nodes_need = random.randint(0,max_node_in_graph)
-    id_my_node = random.randint(0,max_node_in_graph)        # Maybe node in which function is executed is not in the list of avaliable nodes
-    for i in range(0,N_nodes_need):
-        id_node = random.randint(0,N_nodes_need)
-        if id_node != id_my_node:
-            get_data_other_nodes.append(id_node)
+    data_needed = getDataNeededForAFunctionWithinANode(id_nodo,my_function)
     # or if I want to execute 'my_function', get dependencies
-
-
 
    # assert cpu_cores>0, "Specify how many cores you want to run in CPU"
     node_load = random.uniform(0.0,1.0)
 
-    t_execution_planning = getExecutionTimePlanning(cpu_cores=cpu_cores,gpu_cores=gpu_cores,arm_cores=arm_cores,get_data_other_nodes=get_data_other_nodes,node_load=node_load)
-    energy_consumption = getEnergyConsumptionPlanning(cpu_cores=cpu_cores,gpu_cores=gpu_cores,arm_cores=arm_cores,get_data_other_nodes=get_data_other_nodes,node_load=node_load)
+    t_execution_planning = getExecutionTimePlanning(id_nodo=id_nodo,data_needed=data_needed,node_load=node_load,planning=my_planning)
+    energy_consumption = getEnergyConsumptionPlanning(id_nodo=id_nodo,data_needed=data_needed,node_load=node_load,planning=my_planning)
  
     return t_execution_planning,energy_consumption
 
@@ -202,24 +242,14 @@ def evaluate_function(values,my_function):
 #   - It is supposed hardware technology is exclusive (i.e. if ARM is used, then CPU and GPU are not used)
 #   - If get_data_other_nodes.isEmpty() then needed data will be within node.
 
-def getExecutionTimePlanning(cpu_cores,gpu_cores,arm_cores,get_data_other_nodes,node_load):
-    time=0.0
-    if cpu_cores != 0.0 and gpu_cores == 0.0 and arm_cores == 0.0:
-        logging.info("Execution time with CPU. Cores: "+str(cpu_cores)+". Dependencies: "+str(get_data_other_nodes))
-        time = executionTimePlanned(cpu_cores,get_data_other_nodes,p_CPU)
-
-    if cpu_cores == 0.0 and gpu_cores != 0.0 and arm_cores == 0.0:
-        logging.info("Execution time with GPU. Cores: "+str(gpu_cores)+". Dependencies: "+str(get_data_other_nodes))
-        time = executionTimePlanned(gpu_cores,get_data_other_nodes,p_GPU)
-
-    if cpu_cores == 0.0 and gpu_cores == 0.0 and arm_cores != 0.0:
-        logging.info("Execution time with ARM. Cores: "+str(arm_cores)+". Dependencies: "+str(get_data_other_nodes))
-        time = executionTimePlanned(arm_cores,get_data_other_nodes,p_ARM)
+def getExecutionTimePlanning(id_nodo,data_needed,node_load,planning):
+    logging.info("Execution time with a planning. CPU cores: "+str(cpu_cores)+", GPU cores: "+str(gpu_cores)+" and ARM cores: "+str(arm_cores))
+    
+    time = executionTimePlanned(id_nodo,get_data_other_nodes,planning)
 
     logging.info("Node load: "+str(node_load))
     logging.info("Total execution time depending on node_load is "+str((1.0+node_load)*time))
     return (1.0+node_load)*time
-
 
 # Because I do not know if planned behaviour for CPU/ARM/GPU is correct, I repeat code. If CPU/ARM/GPU influences in other variables, there is not a problem. In other case, we can bind
 # this functions in a single function
@@ -231,7 +261,7 @@ def getExecutionTimePlanning(cpu_cores,gpu_cores,arm_cores,get_data_other_nodes,
 #   2.1) I have all data I need within node--> I get all data I need depending on function (important because in this way I discriminate data storaged within node)
 #   2.2) I know what I must run, then I do that
 
-def executionTimePlanned(cpu_cores,get_data_other_nodes,p_hardware):
+def executionTimePlanned(id_nodo,data_needed,planning):
     #Here I define an approach function to cpu time
         # Now, I do the same with transmission time
 
@@ -239,33 +269,40 @@ def executionTimePlanned(cpu_cores,get_data_other_nodes,p_hardware):
     t_j_i_final = 0.0
     time_other_nodes_final = 0.0
 
-    if(len(get_data_other_nodes)>0):    # Only if data from other nodes is needed we have to consider this time
+    if(len(data_needed)>0):    # Only if data from other nodes is needed we have to consider this time
         t_i_j=0.0
-        for node_index in get_data_other_nodes:
-            t_i_j = t_i_j + getTCommunication(-1,node_index)   # We should know index of current node
+        t_j_i = 0.0
+        nodes_needed = []
+        for data_block in data_needed:
+            time,id = getTCommunication(id_nodo,data_block,-1)  # Devolver tiempo de comunicación más corto del nodo actual al que tenga 'data_block' con su id
+            t_i_j = t_i_j + time   # We should know index of current node
+            if id!=-1:
+                nodes_needed.append(id)
 
         t_i_j_final = t_i_j
-        
-        time_other_nodes = 0.0
-        for node_index in get_data_other_nodes: #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            # We should use a function in which cpu_cores/arm_cores/gpu_cores for foreign node are indicated
-            # which node should be executed, and if it needs data from different nodes, it should be indicated too
-            time_other_nodes = time_other_nodes + getRandomTime()    # Replace `getRandomTime() with `getExecutionTimePlanning` (it is more complex, we do not know at first how many cores, which technology should be used,...)
-        time_other_nodes_final = time_other_nodes
 
-        t_j_i = 0.0
-        for node_index in get_data_other_nodes:
-            t_j_i = t_j_i + getTCommunication(node_index,-1)
+        for id in nodes_needed:
+            time,_ = getTCommunication(id,-1,id_nodo)   # Solo devolver tiempo comunicación nodo más cercano con el anterior data_block al nodo actual
+            t_j_i = t_j_i + time
+
         t_j_i_final = t_j_i
-        
 
+        proccess_time = 0.0
+        for id in nodes_needed:
+            time = executionTimePlanned(id,[],planning) # Se supone por simplicidad que si llama a un nodo, este es el que devuelve Dijkstra con el data_block necesario
+            proccess_time = proccess_time + time
+
+        time_other_nodes_final = proccess_time
+               
     # We process data within node
 
     # Then I get data within node. In this function we have data needed from other nodes
     tAccessData =getTAccessData('wsclean -size 3072 3072 -scale 0.7amin -niter 10000 -mgain 0.8 -auto-threshold 3 obs.ms')
     tProcessingData = getTProcessingData('wsclean -size 3072 3072 -scale 0.7amin -niter 10000 -mgain 0.8 -auto-threshold 3 obs.ms')
 
-    tExecutingFunction = (tAccessData+tProcessingData) / (cpu_cores**p_hardware)
+    #tExecutingFunction = (tAccessData+tProcessingData) / (cpu_cores**p_hardware)
+
+    tExecutingFunction = inferredTimeOnNumberOfCores(tAccessData+tProcessingData,obtenerDeNodoNVariableK(planning,id_nodo,1),obtenerDeNodoNVariableK(planning,id_nodo,2),obtenerDeNodoNVariableK(planning,id_nodo,3))
 
     return (tExecutingFunction + t_i_j_final + t_j_i_final + time_other_nodes_final)
 
@@ -290,11 +327,14 @@ def tProcessingData(my_function):
     return (end-init)
 
 # Time spent communicating with other node. It is a prototype, but distance_i_j and bandwith are not constants
-def tCommunication(node_i,node_j):
-    distance_i_j=10000  # m
-    bandwith = 50000   # MB/s
-    logging.info("Communication time from node "+str(node_i)+" to "+str(node_j)+" is "+str(distance_i_j/bandswith))
-    return (distance_i_j/bandswith)  # s
+def tCommunication(node_i,data_block,node_j):
+    # COMPLETAR: Algoritmo de Dijkstra. Devolver id "más cercano" que tenga data_block. PERO si está en el propio nodo, devolver time=0 e id=-1
+    if data_block_within_node_i(node_i,data_block):
+        return 0.0,-1
+
+    # ALGORITMO DIJKSTRA
+    
+    return None
 # -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 #----------------------------------------------------------------- ENERGY CONSUMPTION MODULE ------------------------------------------------------------------------------------------------------
@@ -303,26 +343,16 @@ def tCommunication(node_i,node_j):
 #   - If gpu_cores==0, then GPU will not be needed
 #   - If get_data_other_nodes.isEmpty() then needed data will be within node.
 
-def getEnergyConsumptionPlanning(cpu_cores,gpu_cores,arm_cores,get_data_other_nodes,node_load):
-    energy=0.0
-    if cpu_cores != 0.0 and gpu_cores == 0.0 and arm_cores == 0.0:
-        logging.info("Energy planned with CPU. Cores: "+str(cpu_cores)+". Dependencies: "+str(get_data_other_nodes))
-        energy = energyPlanned(cpu_cores,get_data_other_nodes,p_CPU)
-    
-    if cpu_cores == 0.0 and gpu_cores != 0.0 and arm_cores == 0.0:
-        logging.info("Energy planned with GPU. Cores: "+str(gpu_cores)+". Dependencies: "+str(get_data_other_nodes))
-        energy = energyPlanned(gpu_cores,get_data_other_nodes,p_GPU)
-   
-    if cpu_cores == 0.0 and gpu_cores == 0.0 and arm_cores != 0.0:
-        logging.info("Energy planned with ARM. Cores: "+str(arm_cores)+". Dependencies: "+str(get_data_other_nodes))
-        energy = energyPlanned(arm_cores,get_data_other_nodes,p_ARM)
+def getEnergyConsumptionPlanning(id_nodo,data_needed,node_load,planning):
+
+    energy = energyPlanned(id_nodo,data_needed,planning)
 
     logging.info("Node load: "+str(node_load))
     logging.info("Total energy consumption depending on node_load is "+str((1.0+node_load)*energy))
     return (1.0+node_load)*energy
 
 
-def energyPlanned(cpu_cores,get_data_other_nodes,p_hardware):
+def energyPlanned(id_nodo,data_needed,planning):
     # The same but energy with CPU
     EnWaitingNode = 0.0
     EnConsTransmission = 0.0
@@ -334,7 +364,7 @@ def energyPlanned(cpu_cores,get_data_other_nodes,p_hardware):
         EnWaitingNode = EnWaitingNode + getRandomEnergy()   # It could be modelised with a semaphore or monitor. IT DEPEND ON EXECUTION TIME IN THE FOREIGN NODE
         # IF WE SHOULD TAKE INTO ACCOUNT ENERGY IN OTHER NODE, WE SHOULD DO IT HERE.
 
-    EnConsumptionProcessing = getRandomEnergy() * (cpu_cores**p_hardware)
+    EnConsumptionProcessing = inferredEnergyOnNumberOfCores(getRandomEnergy(),obtenerDeNodoNVariableK(planning,id_nodo,1),obtenerDeNodoNVariableK(planning,id_nodo,2),obtenerDeNodoNVariableK(planning,id_nodo,3))
 
     return (EnConsumptionProcessing+EnConsTransmission+EnWaitingNode)
 
@@ -352,13 +382,13 @@ def reading_flags_given():
     reload_value = args.reload == 'True'
 
     if reload_value:
-        if args.exec:
-            raise ValueError("Error: --exec cannot be used when --reload is True.")
+      #  if args.exec:
+      #      raise ValueError("Error: --exec cannot be used when --reload is True.")
         if not args.features:
             raise ValueError("Error: --features is required when --reload is True.")
     else:
-        if args.features:
-            raise ValueError("Error: --features cannot be used when --reload is False.")
+     #   if args.features:
+     #       raise ValueError("Error: --features cannot be used when --reload is False.")
         if not args.exec:
             raise ValueError("Error: --exec is required when --reload is False")
 
@@ -399,6 +429,16 @@ def setting_functions_to_run(moea_problem,functions):
     print(functions)
     moea_problem.setFunctionsToRun(functions)
 
+# INPUT: COMMAND WITH NECESSARY SOFTWARE, PARAMETERS AND DATA
+# NOTA: Por ahora reducir los inputs a parámetros->flag --param, datos->flag --data, y así
+def introduceFunction():
+    print("Please, introduce a function to be run within the system")
+    function_command=input("Function command")
+
+    func = {
+        command: ''
+    }
+
 # ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 # ---------------------------------------------------------------------------- MAIN FUNCTION -------------------------------------------------------------------------------------------------
@@ -408,6 +448,70 @@ def setting_functions_to_run(moea_problem,functions):
 if __name__ == "__main__":
     
     # First function is got
+    if len(sys.argv) > 1:
+        reloading_system,features,functions = reading_flags_given()
+
+        if reloading_system:
+            max_node_in_graph = len(features)
+            upload_new_features(features) 
+
+            # An instance of our problem
+            problem = MOEAforbroker(N_functions_tuplas = 2, P_decision_var = 3)
+
+            # What functions we want to run
+            if functions is not None:
+                setting_functions_to_run(problem,functions)
+
+            # Some algorithms we can execute, in an array
+        # algorithms = [NSGAII(problem), SPEA2(problem), MOEAD(problem), CMAES(problem), IBEA(problem)]
+            algorithms = [NSGAII(problem)]
+            while(True):
+                if functions is None:
+                    func = introduceFunction()
+                    setting_functions_to_run(problem,func)
+
+                # SI QUEREMOS UN SISTEMA DINÁMICO, TAL QUE INTRODUZCO UNA FUNCIÓN Y SE REEVALÚA AL SISTEMA, SE PODRÍA LANZAR EL SIGUIENTE BUCLE COMO UN PROCESO APARTE, Y EL PRINCIPAL SE DEDICA A PEDIR FUNCIONES A LANZAR 
+                for alg in algorithms:
+                        
+                    alg.run(10000)
+
+                    optimal_solutions = alg.result
+
+                    objective_time = []   # First objective
+                    objective_energy = []   # Second objective
+
+                    for solution in optimal_solutions:  # I store every point of optimal solutions for algorithm
+                        objective_time.append(solution.objectives[0])
+                        objective_energy.append(solution.objectives[1])
+                        print("Execution time: "+str(solution.objectives[0])+". Energy Consumption: "+str(solution.objectives[1]))
+
+                    # Create graphics
+                    fig,ax = plt.subplots()
+
+                    # Writing points in graphic
+                    ax.scatter(objective_time,objective_energy)
+
+                    # Adding some specifications
+                    ax.set_xlabel('Execution time')
+                    ax.set_ylabel('Energy consumption')
+                    ax.set_title(f'Optimal Solutions for {str(alg)}')
+
+                    # Saving graphic
+                    plt.savefig(f'{str(alg)}_optimal_solutions.png')
+    else:
+        print("At least one function must be given")
+        exit(-1)
+
+
+# ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+def copiaSeguridadMain():
+        # First function is got
     if len(sys.argv) > 1:
         reloading_system,features,functions = reading_flags_given()
 
@@ -454,6 +558,3 @@ if __name__ == "__main__":
     else:
         print("At least one function must be given")
         exit(-1)
-
-
-# ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
