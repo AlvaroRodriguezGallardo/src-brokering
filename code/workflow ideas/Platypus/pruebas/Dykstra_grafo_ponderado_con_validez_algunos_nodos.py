@@ -1,4 +1,5 @@
 import heapq
+import numpy as np
 
 # Simple example. In the real algorithm, we should know id for start node, and id for end node (iterative proccess, if I want D1, it is not in start node, then we should get which nodes have this data, run Dykstra algorithm and get which is the shortest path)
 # Example: 3 nodes, and we want to go from node 1 to node 3
@@ -14,8 +15,8 @@ graph = [
     [-1.0, -1.0, -1.0, 1.0, 0.0, 2.0, -1.0, -1.0, -1.0, -1.0],
     [-1.0, -1.0, -1.0, -1.0, 2.0, 0.0, 3.0, -1.0, -1.0, -1.0],
     [7.0, -1.0, -1.0, -1.0, -1.0, 3.0, 0.0, 4.0, -1.0, -1.0],
-    [-1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 4.0, 0.0, 5.0, -1.0],
-    [-1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 5.0, 0.0, 6.0],
+    [-1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 4.0, 0.0, -1.0, -1.0],
+    [-1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 0.0, 6.0],
     [-1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 6.0, 0.0],
 ]
 
@@ -28,6 +29,20 @@ def getNodesWithDatablock(datablock,lista_con_datos,lista_candidatos=[]):
     
     return lista_candidatos
 
+def inverseProblem(graph_system,inverse_graph_system):
+    n = len(graph_system)
+    for i in range(0,n):
+        row = []
+        for j in range(0,n):
+            if graph_system[i][j] != 0:
+                row.append(1.0/graph_system[i][j])
+            else:
+                row.append(0.0)
+
+        inverse_graph_system.append(row)
+
+    return inverse_graph_system
+
 # start: Node I want to start
 # graph: Graph of the system, it is a matrix like 'graph'
 # end: Node I want to go to
@@ -36,6 +51,8 @@ def DykstraAlgorithm(start,graph,end):
     distances = [float('inf')] * n
     distances[start] = 0
     queue = [(0, start)]
+    inverse_graph_system = []
+    inverseProblem(graph,inverse_graph_system)
 
     while queue:
         dist, current = heapq.heappop(queue)
@@ -44,8 +61,8 @@ def DykstraAlgorithm(start,graph,end):
             return dist
 
         for neighbor in range(n):
-            if graph[current][neighbor] != -1.0:
-                distance_to_neighbor = dist + graph[current][neighbor]
+            if inverse_graph_system[current][neighbor] != -1.0:
+                distance_to_neighbor = dist + inverse_graph_system[current][neighbor]
                 if distance_to_neighbor < distances[neighbor]:
                     distances[neighbor] = distance_to_neighbor
                     heapq.heappush(queue, (distance_to_neighbor, neighbor))
