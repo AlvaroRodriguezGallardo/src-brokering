@@ -53,7 +53,8 @@ def DykstraAlgorithm(start,graph,end):
     queue = [(0, start)]
     inverse_graph_system = []
     inverseProblem(graph,inverse_graph_system)
-
+    #inverse_graph_system = graph
+    
     while queue:
         dist, current = heapq.heappop(queue)
 
