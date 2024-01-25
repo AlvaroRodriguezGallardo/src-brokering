@@ -8,6 +8,7 @@ import subprocess
 import json
 import argparse
 import logging
+import heapq
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s') 
 # For execution time, we use expression {1/(n_cores)^p}, where p depemds on hardware technology used, i.e, p_CPU < p_ARM < p_GPU. Justification is explained in https://github.com/AlvaroRodriguezGallardo/src-brokering/blob/main/docs/broker/MOEA/broker_optimisation_algorithm.pdf
@@ -411,7 +412,6 @@ def tProcessingData(my_function):
 #   - If get_data_other_nodes.isEmpty() then needed data will be within node.
 
 def getEnergyConsumptionPlanning(id_nodo,data_needed,node_load,planning):
-
     energy = energyPlanned(id_nodo,data_needed,planning)
 
     logging.info("Node load: "+str(node_load))
@@ -420,7 +420,6 @@ def getEnergyConsumptionPlanning(id_nodo,data_needed,node_load,planning):
 
 
 def energyPlanned(id_nodo,data_needed,planning):
-    # The same but energy with CPU
     EnWaitingNode = 0.0
     EnConsTransmission = 0.0
 
@@ -481,7 +480,7 @@ def upload_new_features(features):
             if not (0.0 <= node_dict["LOAD"] <= 1.0):
                 raise ValueError("LOAD must be a real number in [0,1]")
             load_in_each_node.append(node_dict["LOAD"])
-            transmission_bandswith.append(node_dict["CONNECTIONS"])
+            transmission_bandswith.append(node_dict["CONNECTIONS"])     #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! CHANGE IT
             data_avaliable.append(node_dict["DATA"])
         else:
             print("Error: faltan claves en el diccionario.")
