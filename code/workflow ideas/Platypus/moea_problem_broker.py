@@ -18,13 +18,16 @@ p_ARM = 2
 p_GPU = 3
 N_execution_plannings = 1 # It could generalise to a array of dictionaries but functions must be tight
 
+# Graph features
 max_node_in_graph = 0
+graph_system = []  # grap_system[i][j] is a float. If it is -1.0, then i is not connected to j. Besides, if it is 0.0, then i==j. List of lists!!!
+data_avaliable = []             # List of lists (string)
+
+# Nodes feautres
 max_cpus_in_each_node = []
 max_gpus_in_each_node = []
 max_arms_in_each_node = []
 load_in_each_node = []
-transmission_bandswith = []     # List of list of dictionaries. For example, in N1, it is position 0 in `transmission_bandswith`, and transmission_bandswith[0]={'2':3,'5':10}. Consequently, N1 is connected with N2 and N5
-data_avaliable = []             # List of lists (string)
 
 class MOEAforbroker(Problem):    
     def __init__(self, N_functions_tuplas=2,P_decision_var=3):
@@ -178,6 +181,72 @@ def data_block_within_node_i(node_i,data_block):
             return True
     return False
 
+def getNodesWithDatablock(datablock,lista_candidatos=[]):
+    cont = 1
+    for p in data_avaliable:
+        if datablock in p:
+            lista_candidatos.append(cont)
+        cont = cont + 1
+    
+    return lista_candidatos
+
+def inverseProblem(inverse_graph_system):
+    n = len(graph_system)
+    for i in range(0,n):
+        row = []
+        for j in range(0,n):
+            if graph_system[i][j] != 0:
+                row.append(1.0/graph_system[i][j])
+            else:
+                row.append(0.0)
+
+        inverse_graph_system.append(row)
+
+    return inverse_graph_system
+
+def DykstraAlgorithm(start,end):
+    n = len(graph)
+    distances = [float('inf')] * n
+    distances[start] = 0
+    queue = [(0, start)]
+    inverse_graph_system = []
+    inverseProblem(inverse_graph_system)
+
+    while queue:
+        dist, current = heapq.heappop(queue)
+
+        if current == end:
+            return dist
+
+        for neighbor in range(n):
+            if inverse_graph_system[current][neighbor] != -1.0:
+                distance_to_neighbor = dist + inverse_graph_system[current][neighbor]
+                if distance_to_neighbor < distances[neighbor]:
+                    distances[neighbor] = distance_to_neighbor
+                    heapq.heappush(queue, (distance_to_neighbor, neighbor))
+
+    return float('inf')
+
+# Time spent communicating with other node. It is a prototype, but distance_i_j and bandwith are not constants
+def getTCommunicationMinimo(id_nodo,nodes_needed_for_a_datablock):
+    # COMPLETAR: Algoritmo de Dijkstra. Distancia mínima. Si es 0, son el mismo, si devuelve inf no están conectados
+    distances = []
+
+    for an_end_node in nodes_needed_for_a_datablock:
+        distances.append(DykstraAlgorithm(id_nodo-1,an_end_node-1))
+
+    if distances:
+        end_node = lista_distancias.index(min(lista_distancias))+1
+        min_distance = lista_distancias[end_node-1]
+    else:
+        min_distance = float('inf')
+        end_node = -1
+
+    if min_distance == float('inf'):
+        end_node = -1
+    
+    return min_distance, end_node
+
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 #--------------------------------------------------------------------- RANDOM VALUES FUNCTIONS ------------------------------------------------------------------------------------------
 
@@ -274,16 +343,23 @@ def executionTimePlanned(id_nodo,data_needed,planning):
         t_j_i = 0.0
         nodes_needed = []
         for data_block in data_needed:
-            time,id = getTCommunication(id_nodo,data_block,-1)  # Devolver tiempo de comunicación más corto del nodo actual al que tenga 'data_block' con su id
-            t_i_j = t_i_j + time   # We should know index of current node
+            nodes_needed_locally = []   # Usado 'localmente' para cierto bloque de datos, a diferencia del 'nodes_needed', que se usará para estimar el tiempo de ejecución en ese nodo
+            getNodesWithDatablock(data_block,nodes_needed_locally)
+
+            time,id = getTCommunicationMinimo(id_nodo,nodes_needed_locally) # Aquí está la crema del algoritmo. Dykstra y camino mínimo de los mínimos
+        
             if id!=-1:
-                nodes_needed.append(id)
+                nodes_needed.append(id)     # Si id_nodo==id, no suma al tiempo de transmisión, pero sí se tiene en cuenta para el tiempo de procesamiento (dentro del mismo nodo, no necesita comunicación, pero sí procesar datos)
+            else:
+                time = 999999999999.0  # Penalización por no poder conectar con el nodo necesario para el datablock requerido
+
+            t_i_j = t_i_j + time # Ese tiempo mínimo de los mínimos es el que tomo, y el id al nodo. Si id == -1, entonces no está conectado, y devuelve time=inf
 
         t_i_j_final = t_i_j
 
         for id in nodes_needed:
-            time,_ = getTCommunication(id,-1,id_nodo)   # Solo devolver tiempo comunicación nodo más cercano con el anterior data_block al nodo actual
-            t_j_i = t_j_i + time
+            time,_ = getTCommunicationMinimo(id,-1,[id_nodo])   # Solo devolver tiempo comunicación nodo más cercano con el anterior data_block al nodo actual. Caso particular del anterior
+            t_j_i = t_j_i + time                                # Pongo [id_nodo] para reutilizar la función y que reciba las estructuras de datos como espera manejarlas
 
         t_j_i_final = t_j_i
 
@@ -326,15 +402,6 @@ def tProcessingData(my_function):
 
     return (end-init)
 
-# Time spent communicating with other node. It is a prototype, but distance_i_j and bandwith are not constants
-def tCommunication(node_i,data_block,node_j):
-    # COMPLETAR: Algoritmo de Dijkstra. Devolver id "más cercano" que tenga data_block. PERO si está en el propio nodo, devolver time=0 e id=-1
-    if data_block_within_node_i(node_i,data_block):
-        return 0.0,-1
-
-    # ALGORITMO DIJKSTRA
-    
-    return None
 # -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 #----------------------------------------------------------------- ENERGY CONSUMPTION MODULE ------------------------------------------------------------------------------------------------------
