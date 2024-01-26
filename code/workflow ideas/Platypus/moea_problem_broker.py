@@ -366,7 +366,7 @@ def executionTimePlanned(id_nodo,data_needed,planning):
 
         proccess_time = 0.0
         for id in nodes_needed:
-            time = executionTimePlanned(id,[],planning) # Se supone por simplicidad que si llama a un nodo, este es el que devuelve Dijkstra con el data_block necesario
+            time = getExecutionTimePlanning(id,[],load_in_each_node[id-1],planning) # Se supone por simplicidad que si llama a un nodo, este es el que devuelve Dijkstra con el data_block necesario
             proccess_time = proccess_time + time
 
         time_other_nodes_final = proccess_time
@@ -422,13 +422,28 @@ def getEnergyConsumptionPlanning(id_nodo,data_needed,node_load,planning):
 def energyPlanned(id_nodo,data_needed,planning):
     EnWaitingNode = 0.0
     EnConsTransmission = 0.0
+    EnOtherNodes = 0.0
 
-    for node in get_data_other_nodes:
+    for data in data_needed:
         # While this loop is running, EnWaitingNode should increase
         EnConsTransmission = EnConsTransmission + getRandomEnergy()
         # Here this thread should be waiting to another thread work
         EnWaitingNode = EnWaitingNode + getRandomEnergy()   # It could be modelised with a semaphore or monitor. IT DEPEND ON EXECUTION TIME IN THE FOREIGN NODE
-        # IF WE SHOULD TAKE INTO ACCOUNT ENERGY IN OTHER NODE, WE SHOULD DO IT HERE.
+        
+        nodes_needed_locally = []
+
+        getNodesWithDatablock(data,nodes_needed_locally)
+
+        _, id = getTCommunicationMinimo(id_nodo,nodes_needed_locally)
+
+        energy = 0.0
+        if id == -1:
+            energy = 999999.9
+        else:
+            energy = getEnergyConsumptionPlanning(id,[],load_in_each_node[id-1],planning)
+        
+        EnOtherNodes = EnOtherNodes + energy
+
 
     EnConsumptionProcessing = inferredEnergyOnNumberOfCores(getRandomEnergy(),obtenerDeNodoNVariableK(planning,id_nodo,1),obtenerDeNodoNVariableK(planning,id_nodo,2),obtenerDeNodoNVariableK(planning,id_nodo,3))
 
