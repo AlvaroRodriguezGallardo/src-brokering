@@ -2,7 +2,7 @@ from platypus import NSGAII,SPEA2,MOEAD,CMAES,OMOPSO,IBEA, Problem, Real,Integer
 import numpy as np
 import random
 import matplotlib.pyplot as plt
-import sys # Getting function
+import sys # Getting function, and sys.maxsize
 import time
 import subprocess
 import json
@@ -107,6 +107,7 @@ def not_zero_at_same_time(vars):
     return -1.0
 
 # A solution is valid while only one of them is positive and rest of them are zero. At least one is positive because of the previous constraint
+# NOT IN USE, IT COULD BE DELETED
 def if_one_positive_rest_zero(vars):
     # Supongo 3 variables de decisión por nodo
     for i in range(0,len(vars),3):
@@ -134,6 +135,11 @@ def obtenerDeNodoNVariableK(lista,N_nodo,K_variable):
     return lista[P_variables_decision*(N_nodo-1) + (K_variable-1)]
 
 # Let an execution planning in a node, with a 3-upla (cpu_cores,gpu_cores,arm_cores). It is supposed an uniform distribution
+
+# CPU: 3, GPU: 4 ARM: 3 --> SUMA=10
+# 3/10-->cpu
+# 4/10 -->gpu
+# 3/10 -->arm
 
 def inferredTimeOnNumberOfCores(time,cpu_cores,gpu_cores,arm_cores):
     total_cores = cpu_cores+gpu_cores+arm_cores
@@ -174,6 +180,7 @@ def getDataNeededForAFunctionWithinANode(id_nodo,function):
 
     return d_needed     # RETURNING A POINTER !!!!
 
+# NOT IN USE, IT COULD BE DELETED
 def data_block_within_node_i(node_i,data_block):
     data_in_node_i = data_avaliable[node_i-1]
 
@@ -329,7 +336,7 @@ def getExecutionTimePlanning(id_nodo,data_needed,node_load,planning):
 #                                    -->NO: No time is spent in this operation
 # 2) Time spent with operations within node: It is a parallel program:
 #   2.1) I have all data I need within node--> I get all data I need depending on function (important because in this way I discriminate data storaged within node)
-#   2.2) I know what I must run, then I do that
+#   2.2) I know wha t I must run, then I do that
 
 def executionTimePlanned(id_nodo,data_needed,planning):
     #Here I define an approach function to cpu time
@@ -352,7 +359,7 @@ def executionTimePlanned(id_nodo,data_needed,planning):
             if id!=-1:
                 nodes_needed.append(id)     # Si id_nodo==id, no suma al tiempo de transmisión, pero sí se tiene en cuenta para el tiempo de procesamiento (dentro del mismo nodo, no necesita comunicación, pero sí procesar datos)
             else:
-                time = 999999999999.0  # Penalización por no poder conectar con el nodo necesario para el datablock requerido
+                time = sys.maxsize  # Penalización por no poder conectar con el nodo necesario para el datablock requerido
 
             t_i_j = t_i_j + time # Ese tiempo mínimo de los mínimos es el que tomo, y el id al nodo. Si id == -1, entonces no está conectado, y devuelve time=inf
 
@@ -366,8 +373,9 @@ def executionTimePlanned(id_nodo,data_needed,planning):
 
         proccess_time = 0.0
         for id in nodes_needed:
-            time = getExecutionTimePlanning(id,[],load_in_each_node[id-1],planning) # Se supone por simplicidad que si llama a un nodo, este es el que devuelve Dijkstra con el data_block necesario
-            proccess_time = proccess_time + time
+            if id != id_nodo:
+                time = getExecutionTimePlanning(id,[],load_in_each_node[id-1],planning) # Se supone por simplicidad que si llama a un nodo, este es el que devuelve Dijkstra con el data_block necesario
+                proccess_time = proccess_time + time
 
         time_other_nodes_final = proccess_time
                
@@ -428,7 +436,7 @@ def energyPlanned(id_nodo,data_needed,planning):
         # While this loop is running, EnWaitingNode should increase
         EnConsTransmission = EnConsTransmission + getRandomEnergy()
         # Here this thread should be waiting to another thread work
-        EnWaitingNode = EnWaitingNode + getRandomEnergy()   # It could be modelised with a semaphore or monitor. IT DEPEND ON EXECUTION TIME IN THE FOREIGN NODE
+        EnWaitingNode = EnWaitingNode + getRandomEnergy()   # It could be modelised with a semaphore or monitor. IT DEPENDS ON EXECUTION TIME IN THE FOREIGN NODE
         
         nodes_needed_locally = []
 
@@ -438,9 +446,9 @@ def energyPlanned(id_nodo,data_needed,planning):
 
         energy = 0.0
         if id == -1:
-            energy = 999999.9
-        else:
-            energy = getEnergyConsumptionPlanning(id,[],load_in_each_node[id-1],planning)
+            energy = sys.maxsize
+        elif id != id_nodo:
+            energy = getEnergyConsumptionPlanning(id,[],load_in_each_node[id-1],planning)       #!!!!!!!!!!!!!!!!!!
         
         EnOtherNodes = EnOtherNodes + energy
 
