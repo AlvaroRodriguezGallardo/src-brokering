@@ -35,4 +35,23 @@ Finally, we have executed the programme, which gets the image `perro_husky.jpg` 
 
 ## Work
 
-In this branch, you will find documentation and code about a system with only a node. If you want to see documentation and code about a general algorithm based in MOEA, please, go to branch [Multinode-System](https://github.com/AlvaroRodriguezGallardo/src-brokering/tree/Multinode-System)
+In this branch, you will find documentation and code about a system with only a node. If you want to see documentation and code about a general algorithm based in MOEA, please, go to branch [Multinode-System](https://github.com/AlvaroRodriguezGallardo/src-brokering/tree/Multinode-System). Documentation about WSClean and a bit of DNNs are here too.
+
+Now it will be explained every folder in this branch.
+
+- [/docs](https://github.com/AlvaroRodriguezGallardo/src-brokering/tree/main/docs): Here you will find three folders: ``OSCAR``, ``broker`` and ``wsclean``.
+- 
+- [/docs/OSCAR](https://github.com/AlvaroRodriguezGallardo/src-brokering/tree/main/docs/OSCAR): There is a Readme.md where you can read all about OSCAR instalation: what is OSCAR, ways to install it,...
+- 
+- [/docs/wsclean](https://github.com/AlvaroRodriguezGallardo/src-brokering/tree/main/docs/wsclean): There is a Readme.md where it is summarized WSClean library from the point of view of a mathematical and/or computer scientist. All about arguments that could be interesting, what is WSClean,...
+- 
+- [/docs/broker](https://github.com/AlvaroRodriguezGallardo/src-brokering/tree/main/docs/broker): Broker is a set of algorithms that leads all about system control. You will find two folders: ``DNN/Transformer`` and ``MOEA``.
+- 
+- [/docs/broker/DNN/Transformer](https://github.com/AlvaroRodriguezGallardo/src-brokering/tree/main/docs/broker/DNN/Transformer): Information about transformers for an interpretation problem. It is not very developed.
+- 
+- [/docs/broker/MOEA](https://github.com/AlvaroRodriguezGallardo/src-brokering/tree/main/docs/broker/MOEA): All developed about MOEA algorithms for broker is here, and a script that interpolates functions because it was thought to be necessary. You will find two folders. In ``Platypus`` folder there are only examples made for training. In ``Workflow ideas`` folder you will find ideas about algorithm.
+- 
+- [/docs/broker/MOEA/Workflow ideas](https://github.com/AlvaroRodriguezGallardo/src-brokering/tree/main/docs/broker/MOEA/Workflow%20ideas): Ideas explained in detail about theorical behaviour. ``Platypus`` folder has the environment and script that simulates the algorithm.
+- 
+- [/docs/broker/MOEA/Workflow ideas/Platypus](https://github.com/AlvaroRodriguezGallardo/src-brokering/tree/main/docs/broker/MOEA/Workflow%20ideas/Platypus): Environment with docs you need to use Platypus library. Within file ``moea_problem_broker.py`` you can find the simulation of the algorithm and how model has been implemented.
+
