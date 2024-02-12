@@ -30,6 +30,11 @@ max_gpus_in_each_node = []
 max_arms_in_each_node = []
 load_in_each_node = []
 
+# Number of decision variables
+NUMBER_CPU = 1
+NUMBER_GPU = 2
+NUMBER_ARM = 3
+
 class MOEAforbroker(Problem):    
     def __init__(self, N_functions_tuplas=2,P_decision_var=3):
         self.dictionary_functions = []
@@ -293,9 +298,9 @@ def getRandomEnergy():
 def evaluate_function(values,my_function):
     id_nodo = values[0]
     my_planning = values[1:]
-    cpu_cores = obtenerDeNodoNVariableK(my_planning,id_nodo,1)                         # double
-    gpu_cores = obtenerDeNodoNVariableK(my_planning,id_nodo,2)                        # double. If gpu_cores==0, then it is supposed GPU is not needed
-    arm_cores = obtenerDeNodoNVariableK(my_planning,id_nodo,3)                             # double
+    cpu_cores = obtenerDeNodoNVariableK(my_planning,id_nodo,NUMBER_CPU)                         # double
+    gpu_cores = obtenerDeNodoNVariableK(my_planning,id_nodo,NUMBER_GPU)                        # double. If gpu_cores==0, then it is supposed GPU is not needed
+    arm_cores = obtenerDeNodoNVariableK(my_planning,id_nodo,NUMBER_ARM)                             # double
 
     data_needed = getDataNeededForAFunctionWithinANode(id_nodo,my_function)
     # or if I want to execute 'my_function', get dependencies
@@ -387,7 +392,7 @@ def executionTimePlanned(id_nodo,data_needed,planning):
 
     #tExecutingFunction = (tAccessData+tProcessingData) / (cpu_cores**p_hardware)
 
-    tExecutingFunction = inferredTimeOnNumberOfCores(tAccessData+tProcessingData,obtenerDeNodoNVariableK(planning,id_nodo,1),obtenerDeNodoNVariableK(planning,id_nodo,2),obtenerDeNodoNVariableK(planning,id_nodo,3))
+    tExecutingFunction = inferredTimeOnNumberOfCores(tAccessData+tProcessingData,obtenerDeNodoNVariableK(planning,id_nodo,NUMBER_CPU),obtenerDeNodoNVariableK(planning,id_nodo,NUMBER_GPU),obtenerDeNodoNVariableK(planning,id_nodo,NUMBER_ARM))
 
     return (tExecutingFunction + t_i_j_final + t_j_i_final + time_other_nodes_final)
 
@@ -448,12 +453,12 @@ def energyPlanned(id_nodo,data_needed,planning):
         if id == -1:
             energy = sys.maxsize
         elif id != id_nodo:
-            energy = getEnergyConsumptionPlanning(id,[],load_in_each_node[id-1],planning)       #!!!!!!!!!!!!!!!!!!
+            energy = getEnergyConsumptionPlanning(id,[],load_in_each_node[id-1],planning)     
         
         EnOtherNodes = EnOtherNodes + energy
 
 
-    EnConsumptionProcessing = inferredEnergyOnNumberOfCores(getRandomEnergy(),obtenerDeNodoNVariableK(planning,id_nodo,1),obtenerDeNodoNVariableK(planning,id_nodo,2),obtenerDeNodoNVariableK(planning,id_nodo,3))
+    EnConsumptionProcessing = inferredEnergyOnNumberOfCores(getRandomEnergy(),obtenerDeNodoNVariableK(planning,id_nodo,NUMBER_CPU),obtenerDeNodoNVariableK(planning,id_nodo,NUMBER_GPU),obtenerDeNodoNVariableK(planning,id_nodo,NUMBER_ARM))
 
     return (EnConsumptionProcessing+EnConsTransmission+EnWaitingNode)
 
