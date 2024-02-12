@@ -9,7 +9,7 @@ import json
 import argparse
 import logging
 import heapq
-
+import copy  
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s') 
 # For execution time, we use expression {1/(n_cores)^p}, where p depemds on hardware technology used, i.e, p_CPU < p_ARM < p_GPU. Justification is explained in https://github.com/AlvaroRodriguezGallardo/src-brokering/blob/main/docs/broker/MOEA/broker_optimisation_algorithm.pdf
 
@@ -489,7 +489,7 @@ def reading_flags_given():
     return reload_value, features_content, args.exec
 
 def upload_new_features(features):
-
+    id_node = 1
     # It is supposed that if Spain node es 1, then position in this array is 0, if Japan node is 2, position in this array is 1, ...
     for node_dict in features:
         if not isinstance(node_dict, dict):
@@ -503,11 +503,62 @@ def upload_new_features(features):
             if not (0.0 <= node_dict["LOAD"] <= 1.0):
                 raise ValueError("LOAD must be a real number in [0,1]")
             load_in_each_node.append(node_dict["LOAD"])
-            transmission_bandswith.append(node_dict["CONNECTIONS"])     #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! CHANGE IT
+            resizing_connections_matrix(id_node,node_dict["CONNECTIONS"])
             data_avaliable.append(node_dict["DATA"])
         else:
             print("Error: faltan claves en el diccionario.")
             exit(-1)
+
+        id_node = id_node + 1
+
+# INPUT:    id: it identifies a node within the graph
+#           connections: list of dictionaries (for now) which represents bandwith with other nodes (consequently, if a node does not appear here, then it is not connected with 'id' node)
+# OUTPUT:   None
+# WARNING:  Python uses pointers, so functions like 'copy()' should be used
+# It is supposed if a node has to be added, it is put at the end of the matrix, with the respective id
+def resizing_connections_matrix(id,connections):
+    previous_matrix = copy.deepcopy(graph_system)
+
+    n_nodes = max(len(previous_matrix),get_max_id_node(connections))
+    graph_system = []
+
+    for i in range(0,n_nodes):
+        aux = []
+        if i == id-1:
+            insert_connections_row_within_graph(i,n_nodes,connections)
+        elif previous_matrix[i] is not None:        # If len(previous_matrix[i]) <= n_nodes, then we should add an array with n_nodes-len(previous_matrix[i]) length to full the list of possible connections, with -1.0 because it was not indicated the connections between them
+            aux.append(previous_matrix[i])
+            rest_of_them_aux = [-1.0] * (n_nodes-len(previous_matrix[i]))
+            aux.append(rest_of_them_aux)
+
+            graph_system[i] = copy.deepcopy(aux)
+        else:
+          ##  logging.info("You should not have executed this code in average conditions!!!")
+            logging.info("It is supposed in a future connections with "+str(id)+" node are given")   # If it should be changed in a future, it will enter into the first conditional block (condition i==id-1)
+            aux = [-1.0] * (n_nodes)
+            graph_system[i] = copy.deepcopy(aux)
+
+# Auxiliar function for 'resizing_connections_matrix'. Given a list of nodes, it returns the maximum id (it is supposed 'connections' could not be ordered)
+def get_max_id_node(connections):
+    max_id = connections[0][0]
+
+    for p in connections:
+        max_id = max(max_id,p[0])
+    return max_id
+
+def insert_connections_row_within_graph(i,n_nodes,connections):
+    aux = [-1.0]*(n_nodes)
+    aux[i] = 0.0
+
+    id_nodes_with_connections = list(connections.keys())
+    for j in range(n_nodes):        # j starts in 0 and goes to n_nodes-1
+        if j+1 in id_nodes_with_connections:    # id_nodes_with_connections has elements between 1 and n_nodes
+            aux[j] = connections[j][1]
+
+    if graph_system[i] is not None: # Changing connections of a node that exists (example of use: a node has fallen)
+        graph_system[i] = copy.deepcopy(aux)
+    else:
+        graph_system.append(copy.deepcopy(aux)) # Node i+1 did not exist within the graph
 
 # INPUT: object that represents a MOEA problem
 # RETURN: MOEA problem with functions must be runned set
