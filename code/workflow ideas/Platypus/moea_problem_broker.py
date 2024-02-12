@@ -493,28 +493,27 @@ def reading_flags_given():
 
     return reload_value, features_content, args.exec
 
+# ID \in [1,max_nodes]
+
 def upload_new_features(features):
-    id_node = 1
     # It is supposed that if Spain node es 1, then position in this array is 0, if Japan node is 2, position in this array is 1, ...
     for node_dict in features:
         if not isinstance(node_dict, dict):
             print("Error: each element must be a dictionary")
             exit(-1)
 
-        if all(key in node_dict for key in ["CPU", "GPU", "ARM", "LOAD"]):
+        if all(key in node_dict for key in ["ID","CPU", "GPU", "ARM", "LOAD"]):
             max_cpus_in_each_node.append(node_dict["CPU"])
             max_gpus_in_each_node.append(node_dict["GPU"])
             max_arms_in_each_node.append(node_dict["ARM"])
             if not (0.0 <= node_dict["LOAD"] <= 1.0):
                 raise ValueError("LOAD must be a real number in [0,1]")
             load_in_each_node.append(node_dict["LOAD"])
-            resizing_connections_matrix(id_node,node_dict["CONNECTIONS"])
+            resizing_connections_matrix(node_dict["ID"],node_dict["CONNECTIONS"])
             data_avaliable.append(node_dict["DATA"])
         else:
             print("Error: faltan claves en el diccionario.")
             exit(-1)
-
-        id_node = id_node + 1
 
 # INPUT:    id: it identifies a node within the graph
 #           connections: list of dictionaries (for now) which represents bandwith with other nodes (consequently, if a node does not appear here, then it is not connected with 'id' node)
