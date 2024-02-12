@@ -63,7 +63,7 @@ class MOEAforbroker(Problem):
             self.types.append(Integer(0, max_gpus_in_each_node[i]))
             self.types.append(Integer(0, max_arms_in_each_node[i]))
     
-        # Some constraints are defined:  they can not be zero at the same time (1) and if one of them is positive, rest of them are zero (2)  (the last one is because of how is implemented our function)
+        # Some constraints are defined:  they can not be zero at the same time (1)
         # Platypus logic in manually implemented constraints: solution is valid if it returns a value <=0
                                                                                 #*******************************************************************************************************************
         self.constraints[:] = [not_zero_at_same_time] #*********** NOTA: Puede haber propuestas en que un nodo use CPU y GPU (ejemplo) según cierto porcentaje, así que hay que cambiar esto último*******
