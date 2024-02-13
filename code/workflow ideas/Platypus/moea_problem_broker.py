@@ -59,9 +59,9 @@ class MOEAforbroker(Problem):
         self.types.clear()
         self.types.append(Integer(1,max_node_in_graph))
         for i in range(max_node_in_graph):
-            self.types.append(Integer(0, max_cpus_in_each_node[i]))     # En vez de "cierto porcentaje de", usamos como plan de ejecución el número de cores correspondiente a ese porcentaje
-            self.types.append(Integer(0, max_gpus_in_each_node[i]))
-            self.types.append(Integer(0, max_arms_in_each_node[i]))
+            self.types.append(Real(0, max_cpus_in_each_node[i]))     # En vez de "cierto porcentaje de", usamos como plan de ejecución el número de cores correspondiente a ese porcentaje
+            self.types.append(Real(0, max_gpus_in_each_node[i]))
+            self.types.append(Real(0, max_arms_in_each_node[i]))
     
         # Some constraints are defined:  they can not be zero at the same time (1)
         # Platypus logic in manually implemented constraints: solution is valid if it returns a value <=0
@@ -96,7 +96,7 @@ class MOEAforbroker(Problem):
 
     ## Getting functions. Debugging
     def getFunctionsToRun():
-        return self.dictionary_functions.copy()
+        return copy.deepcopy(self.dictionary_functions)
 
 #--------------------------------------------------------------------- DEFINING HERE SOME CONSTRAINTS ----------------------------------------------------------------------------------
 
@@ -290,7 +290,7 @@ def getRandomEnergy():
 #   - GPU cores: How many cores are needed if it uses GPU? ---> double (we could want to use 1.5 GPUs)
 #   - ARM cores: How many cores are needed if it uses ARM? ---> double (ídem)
 # Other values are needed, but they are independent of broker 
-#   - get_data_other_nodes: Do I need data from different nodes? ---> List
+#   - data_needed: Do I need data from different nodes? ---> List
 #   - node_load: Which is node_load in the last x days?--> float \in [0,1] 
 # Evaluation function receives a dictionary 'solution' which is the proposed one to the algorithm
 
