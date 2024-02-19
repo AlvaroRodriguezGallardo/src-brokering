@@ -10,8 +10,14 @@ import argparse
 import logging
 import heapq
 import copy  
+import queue
+import multiprocessing
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s') 
 # For execution time, we use expression {1/(n_cores)^p}, where p depemds on hardware technology used, i.e, p_CPU < p_ARM < p_GPU. Justification is explained in https://github.com/AlvaroRodriguezGallardo/src-brokering/blob/main/docs/broker/MOEA/broker_optimisation_algorithm.pdf
+# Variables for a distribute system
+
+commu_get_func_and_alg = queue.Queue()
+
 
 # It is an example for simulation. It should be chosen using experiments with real data
 p_CPU = 1
@@ -37,7 +43,7 @@ NUMBER_ARM = 3
 
 class MOEAforbroker(Problem):    
     def __init__(self, N_functions_tuplas=2,P_decision_var=3):
-        self.dictionary_functions = []
+        self.function = None
         # I establish objectives number (N functions) and how many decision variables there are
         super(MOEAforbroker,self).__init__(P_decision_var,N_functions_tuplas)
 
@@ -91,11 +97,11 @@ class MOEAforbroker(Problem):
         solution.objectives[:] = [t_exec,e_consumption]
 
     # Setting functions we want to run within system
-    def setFunctionsToRun(functions):
-        self.dictionary_functions = functions
+    def setProblemToRun(self,function):
+        self.function = function
 
     ## Getting functions. Debugging
-    def getFunctionsToRun():
+    def getFunctionsToRun(self):
         return copy.deepcopy(self.dictionary_functions)
 
 #--------------------------------------------------------------------- DEFINING HERE SOME CONSTRAINTS ----------------------------------------------------------------------------------
@@ -567,11 +573,9 @@ def insert_connections_row_within_graph(i,n_nodes,connections):
 # INPUT: object that represents a MOEA problem
 # RETURN: MOEA problem with functions must be runned set
 
-def setting_functions_to_run(moea_problem,functions):
-    ### AQUÍ VA RELLENAR LA LISTA DE FUNCIONES A EJECUTAR. VAMOS A SUPONER QUE FORMA PARTE DEL MOEA. SI INICIALIZO Y DEVUELVO EL OBJETO, NO ES BUENO, PUES DEVUELVO PUNTERO A OBJETO DESTRUIDO SI SE INICIALIZA LOCALMENTE
-    ### POSIBLE SOLUCIÓN: RECIBIR EL OBJETO INICIALIZADO Y CREAR ALGÚN SET EN LA CLASE DEL MOEA
-    print(functions)
-    moea_problem.setFunctionsToRun(functions)
+def setting_functions_to_run(functions):
+    print("Function "+functions+" will be run in a future")
+    commu_get_func_and_alg.put(functions)
 
 # INPUT: COMMAND WITH NECESSARY SOFTWARE, PARAMETERS AND DATA
 # NOTA: Por ahora reducir los inputs a parámetros->flag --param, datos->flag --data, y así
@@ -579,11 +583,60 @@ def introduceFunction():
     print("Please, introduce a function to be run within the system")
     function_command=input("Function command")
 
-    func = {
-        command: ''
-    }
+   # func = {
+   #     command: ''
+   # }
+
+   return copy.deepcopy(function_command)
 
 # ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+def getMostImportantFunction():
+    # In a future, here we could do an algorithm that given a queue, it gets the most important function. On the other hand, with a priority queue we can use this code
+    return copy.deepcopy(commu_get_func_and_alg.get())  # As Queue.queue is implemented, if queue is empty, it should wait until some function is put within it
+
+def runningMOEA():
+    problem = MOEAforbroker(N_functions_tuplas=2,P_decision_var=3)
+
+    algorithms = [NSGAII(problem)]
+    while(True):
+        function = getMostImportantFunction()
+
+        # SI QUEREMOS UN SISTEMA DINÁMICO, TAL QUE INTRODUZCO UNA FUNCIÓN Y SE REEVALÚA AL SISTEMA, SE PODRÍA LANZAR EL SIGUIENTE BUCLE COMO UN PROCESO APARTE, Y EL PRINCIPAL SE DEDICA A PEDIR FUNCIONES A LANZAR 
+        problem.setProblemToRun(function)
+        for alg in algorithms:
+                
+            alg.run(10000)
+
+            optimal_solutions = alg.result
+
+            objective_time = []   # First objective
+            objective_energy = []   # Second objective
+
+            for solution in optimal_solutions:  # I store every point of optimal solutions for algorithm
+                objective_time.append(solution.objectives[0])
+                objective_energy.append(solution.objectives[1])
+                print("Execution time: "+str(solution.objectives[0])+". Energy Consumption: "+str(solution.objectives[1]))
+
+                # Create graphics
+                fig,ax = plt.subplots()
+
+                # Writing points in graphic
+                ax.scatter(objective_time,objective_energy)
+
+                # Adding some specifications
+                ax.set_xlabel('Execution time')
+                ax.set_ylabel('Energy consumption')
+                ax.set_title(f'Optimal Solutions for {str(alg)}')
+
+                # Saving graphic
+                plt.savefig(f'{str(function)}_pareto_front.png')
+
+
+def gettingFunctionsToRun():
+    while True:
+        func = introduceFunction()
+        setting_functions_to_run(func)
 
 # ---------------------------------------------------------------------------- MAIN FUNCTION -------------------------------------------------------------------------------------------------
 
@@ -595,53 +648,20 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         reloading_system,features,functions = reading_flags_given()
 
-        if reloading_system:
-            max_node_in_graph = len(features)
-            upload_new_features(features) 
+        max_node_in_graph = len(features)
+        upload_new_features(features) 
 
-            # An instance of our problem
-            problem = MOEAforbroker(N_functions_tuplas = 2, P_decision_var = 3)
+        processGettingFunctions = multiprocessing.Process(target=gettingFunctionsToRun)
+        processRunningMOEA = multiprocessing.Process(target=runningMOEA)
 
-            # What functions we want to run
-            if functions is not None:
-                setting_functions_to_run(problem,functions)
+        # Start running program
+        processGettingFunctions.start()
+        processRunningMOEA.start()
 
-            # Some algorithms we can execute, in an array
-        # algorithms = [NSGAII(problem), SPEA2(problem), MOEAD(problem), CMAES(problem), IBEA(problem)]
-            algorithms = [NSGAII(problem)]
-            while(True):
-                if functions is None:
-                    func = introduceFunction()
-                    setting_functions_to_run(problem,func)
-
-                # SI QUEREMOS UN SISTEMA DINÁMICO, TAL QUE INTRODUZCO UNA FUNCIÓN Y SE REEVALÚA AL SISTEMA, SE PODRÍA LANZAR EL SIGUIENTE BUCLE COMO UN PROCESO APARTE, Y EL PRINCIPAL SE DEDICA A PEDIR FUNCIONES A LANZAR 
-                for alg in algorithms:
-                        
-                    alg.run(10000)
-
-                    optimal_solutions = alg.result
-
-                    objective_time = []   # First objective
-                    objective_energy = []   # Second objective
-
-                    for solution in optimal_solutions:  # I store every point of optimal solutions for algorithm
-                        objective_time.append(solution.objectives[0])
-                        objective_energy.append(solution.objectives[1])
-                        print("Execution time: "+str(solution.objectives[0])+". Energy Consumption: "+str(solution.objectives[1]))
-
-                    # Create graphics
-                    fig,ax = plt.subplots()
-
-                    # Writing points in graphic
-                    ax.scatter(objective_time,objective_energy)
-
-                    # Adding some specifications
-                    ax.set_xlabel('Execution time')
-                    ax.set_ylabel('Energy consumption')
-                    ax.set_title(f'Optimal Solutions for {str(alg)}')
-
-                    # Saving graphic
-                    plt.savefig(f'{str(alg)}_optimal_solutions.png')
+        # If something happens, program ends
+        processGettingFunctions.join()
+        processRunningMOEA.join()
+            
     else:
         print("At least one function must be given")
         exit(-1)
