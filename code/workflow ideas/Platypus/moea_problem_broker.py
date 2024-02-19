@@ -575,8 +575,7 @@ def insert_connections_row_within_graph(i,n_nodes,connections):
             diccionario_buscado = next((d for d in connections if str(j+1) in d), None)
             aux[j] = diccionario_buscado[str(j+1)]
 
-    print(aux)
-    print(graph_system)
+    
     if graph_system == []:
         graph_system.append(copy.deepcopy(aux)) # Node i+1 did not exist within the graph
     else:
@@ -584,6 +583,8 @@ def insert_connections_row_within_graph(i,n_nodes,connections):
             graph_system[i] = copy.deepcopy(aux)
         else:
             graph_system.append(copy.deepcopy(aux)) # Node i+1 did not exist within the graph
+    print("Graph system has been updated")
+    print(graph_system)
 
 # INPUT: object that represents a MOEA problem
 # RETURN: MOEA problem with functions must be runned set
@@ -596,7 +597,7 @@ def setting_functions_to_run(functions):
 # NOTA: Por ahora reducir los inputs a parámetros->flag --param, datos->flag --data, y así
 def introduceFunction():
     print("Please, introduce a function to be run within the system")
-    function_command=input("Function command")
+    function_command=input("Function command: ")
 
    # func = {
    #     command: ''
@@ -666,16 +667,17 @@ if __name__ == "__main__":
         max_node_in_graph = len(features)
         upload_new_features(features) 
 
-        processGettingFunctions = multiprocessing.Process(target=gettingFunctionsToRun)
+       # processGettingFunctions = multiprocessing.Process(target=gettingFunctionsToRun)
         processRunningMOEA = multiprocessing.Process(target=runningMOEA)
 
         # Start running program
-        processGettingFunctions.start()
+        #processGettingFunctions.start()
         processRunningMOEA.start()
+        gettingFunctionsToRun()     # Necessarily, inputs should be done by the main process
 
         # If something happens, program ends
-        processGettingFunctions.join()
-        processRunningMOEA.join()
+       # processGettingFunctions.join()
+        processRunningMOEA.join()   # When a program is finished, main process waits to the other one
             
     else:
         print("File necessary: A list of JSON with system features. An example 'python moea_problem_broker.py --features tests/system_examples/system1-4_nodes.txt  --reload True'")
