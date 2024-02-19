@@ -42,41 +42,28 @@ NUMBER_GPU = 2
 NUMBER_ARM = 3
 
 class MOEAforbroker(Problem):    
-    def __init__(self, N_functions_tuplas=2,P_decision_var=3):
+    def __init__(self, N_functions_tuplas=2, P_decision_var=3):
         self.function = None
-        # I establish objectives number (N functions) and how many decision variables there are
-        super(MOEAforbroker,self).__init__(P_decision_var,N_functions_tuplas)
-
-        # I define decision variables limits. Between 0 and 1. Near to 1 is a good option in the execution planning
-            # Tres elementos por cada nodo. Para saber de qué nodo son, tal como está planteado el problema, dado un elem de self.types, 
-            # se cumple que posicion(elem)//3 + 1 es el id del nodo. Pongamos un ejemplo:
-            # Si posicion(elem)= 2 --> 2//3 + 1 = 0+1 = 1 -->nodo 1
-            # Si posicion(elem) = 10 --> 10//3 + 1 = 3+1=4 --> nodo 4
-            # Si posicion(elem) =100 --> 100//3 + 1 =33+1 = 34 --> nodo 34
-            # Creo que se puede probar por inducción que N//3 + 1 es el nodo correspondiente. Se puede generalzar a N//P_decision_var + 1 para P_decision_var > 1
-            # Es cierto para N=0, pues 0//3 + 1 = 1 -->nodo 1
-            # Supuesto cierto que lo es N//3 +1, veamos (N+1)//3 +1
-            # (N+1)//3 + 1 = N//3 + 1//3 + 1 = N//3 +0 + 1 = N//3 + 1, qué es cierto por hipótesis
-            # En consecuencia, si quiero acceder a los cores de cpu del nodo 1, sería self.types[0], del nodo 2 self.types[3],..., del nodo N self.types[3(N-1)]
-            # Para los cores de gpu del nodo N, self.types[3(N-1) + 1]
-            # Para los cores de arm del nodo N, self.types[3(N-1) + 2]
-            # Se puede generalizar a P variables de decisión, M nodos --> hacemos el sistema escalable, y si se implementa bien, podemos añadir y quitar variables
-            # de decisión sin problema
-        self.types.clear()
-        self.types.append(Integer(1,max_node_in_graph))
+        super(MOEAforbroker, self).__init__(P_decision_var * max_node_in_graph + 1, N_functions_tuplas)
+        
+        # Asegúrate de que los siguientes parámetros sean pasados al constructor o definidos de alguna manera.
+        self.types[0] = Integer(1, max_node_in_graph)
+        aux = []
         for i in range(max_node_in_graph):
-            self.types.append(Real(0, max_cpus_in_each_node[i]))     # En vez de "cierto porcentaje de", usamos como plan de ejecución el número de cores correspondiente a ese porcentaje
-            self.types.append(Real(0, max_gpus_in_each_node[i]))
-            self.types.append(Real(0, max_arms_in_each_node[i]))
-    
-        # Some constraints are defined:  they can not be zero at the same time (1)
-        # Platypus logic in manually implemented constraints: solution is valid if it returns a value <=0
-                                                                                #*******************************************************************************************************************
-        self.constraints[:] = [not_zero_at_same_time] #*********** NOTA: Puede haber propuestas en que un nodo use CPU y GPU (ejemplo) según cierto porcentaje, así que hay que cambiar esto último*******
-                                                                                #*********************************************************************************************************************
-        # What do I want to? --> A minimization problem
-        #self.directions[:] = [self.MINIMIZE] * N_functions
-        self.directions[:] = [Problem.MINIMIZE,Problem.MINIMIZE]    # Vector I want to get. Imagine this function F:R^3 --> R^2
+            aux.append(Real(0, max_cpus_in_each_node[i]))  
+            aux.append(Real(0, max_gpus_in_each_node[i]))  
+            aux.append(Real(0, max_arms_in_each_node[i]))  
+
+        for j in range(0,max_node_in_graph,3):
+            self.types[j+1] = aux[j]
+            self.types[j+2] = aux[j+1]
+            self.types[j+3] = aux[j+2]
+
+        # Definición de restricciones
+        self.constraints[:] = [not_zero_at_same_time]  # Asegúrate de que esta función esté definida correctamente.
+
+        # Definir direcciones de optimización
+        self.directions[:] = [Problem.MINIMIZE] * N_functions_tuplas
 
     def evaluate(self,solution):
         # I get values of decision variables
@@ -526,11 +513,11 @@ def upload_new_features(features):
 # WARNING:  Python uses pointers, so functions like 'copy()' should be used
 # It is supposed if a node has to be added, it is put at the end of the matrix, with the respective id
 def resizing_connections_matrix(id,connections):
-    global graph_system
-    previous_matrix = copy.deepcopy(graph_system)
+   # global graph_system
+   # previous_matrix = copy.deepcopy(graph_system)
 
-    n_nodes = max(len(previous_matrix),get_max_id_node(connections))
-    graph_system = []
+   # n_nodes = max(len(previous_matrix),get_max_id_node(connections))
+   # graph_system = []
 
     #for i in range(0,n_nodes):
     #    aux = []
@@ -554,18 +541,18 @@ def resizing_connections_matrix(id,connections):
     #        logging.info("It is supposed in a future connections with "+str(id)+" node are given")   # If it should be changed in a future, it will enter into the first conditional block (condition i==id-1)
     #        aux = [-1.0] * (n_nodes)
     #        graph_system[i] = copy.deepcopy(aux)
+    global graph_system
+    previous_matrix = copy.deepcopy(graph_system)
+
+    n_nodes = max(len(previous_matrix), get_max_id_node(connections), id)  # Asegurarse de incluir 'id' en la comparación
+    graph_system = [[-1.0] * n_nodes for _ in range(n_nodes)]  # Inicializa graph_system con el tamaño adecuado
+
     for i in range(n_nodes):
-        if i == id - 1:
-            # Lógica para insertar o actualizar conexiones para el nodo específico
-            insert_connections_row_within_graph(i, n_nodes, connections)
-        else:
-            if previous_matrix[i] is not None:
-                # Extiende la lista de conexiones existente con -1.0 si es necesario
-                aux = previous_matrix[i] + [-1.0] * (n_nodes - len(previous_matrix[i]))
-            else:
-                # Registra o inicializa conexiones como no disponibles (-1.0) para nuevos nodos
-                aux = [-1.0] * n_nodes
-                graph_system[i] = aux
+        if i < len(previous_matrix) and previous_matrix[i] is not None:
+            graph_system[i][:len(previous_matrix[i])] = previous_matrix[i]
+
+    if id - 1 < n_nodes:
+        insert_connections_row_within_graph(id - 1, n_nodes, connections)
 
 
 # Auxiliar function for 'resizing_connections_matrix'. Given a list of nodes, it returns the maximum id (it is supposed 'connections' could not be ordered)
