@@ -85,10 +85,9 @@ class MOEAforbroker(Problem):
         # It is supposed 'values' a dictionary as it is inisialised in main function
         # Evaluation function is used to evaluate execution planning given
 
-        for func in self.list_of_functions:
-            t_for_f,e_for_f = evaluate_function(values,func)
-            t_exec = t_exec + t_for_f
-            e_consumption = e_consumption + e_for_f
+        t_for_f,e_for_f = evaluate_function(values,func)
+        t_exec = t_exec + t_for_f
+        e_consumption = e_consumption + e_for_f
 
         if t_exec<=0.0 or e_consumption<=0.0:   # I penalise if one of them is 0.0 --> in reality, it is not possible
             t_exec = e_consumption = 1000
@@ -102,7 +101,7 @@ class MOEAforbroker(Problem):
 
     ## Getting functions. Debugging
     def getFunctionsToRun(self):
-        return copy.deepcopy(self.dictionary_functions)
+        return copy.deepcopy(self.function)
 
 #--------------------------------------------------------------------- DEFINING HERE SOME CONSTRAINTS ----------------------------------------------------------------------------------
 
