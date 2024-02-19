@@ -27,7 +27,7 @@ N_execution_plannings = 1 # It could generalise to a array of dictionaries but f
 
 # Graph features
 max_node_in_graph = 0
-graph_system = []  # grap_system[i][j] is a float. If it is -1.0, then i is not connected to j. Besides, if it is 0.0, then i==j. List of lists!!!
+graph_system = []  # graph_system[i][j] is a float. If it is -1.0, then i is not connected to j. Besides, if it is 0.0, then i==j. List of lists!!!
 data_avaliable = []             # List of lists (string)
 
 # Nodes feautres
@@ -109,7 +109,7 @@ class MOEAforbroker(Problem):
 # Note: I have been studied a bit Platypus, and if constraints are defined manually, then it uses '<=0' if a solution is valid
 def not_zero_at_same_time(vars):
     # Supongo 3 variables de decisión por nodo
-    for i in range(0,len(vars),3)
+    for i in range(0,len(vars),3):
         aux = vars[i] + vars[i+1]+vars[i+2]
         if aux == 0:
             return 1.0
@@ -185,7 +185,7 @@ def getDataNeededForAFunctionWithinANode(id_nodo,function):
 
     for i in range(max_neded):
         p = random.randint(1,n_data_blocks)
-        if p != id_nodo
+        if p != id_nodo:
             d_needed.append("D"+str(p))
 
     return d_needed     # RETURNING A POINTER !!!!
@@ -526,48 +526,77 @@ def upload_new_features(features):
 # WARNING:  Python uses pointers, so functions like 'copy()' should be used
 # It is supposed if a node has to be added, it is put at the end of the matrix, with the respective id
 def resizing_connections_matrix(id,connections):
+    global graph_system
     previous_matrix = copy.deepcopy(graph_system)
 
     n_nodes = max(len(previous_matrix),get_max_id_node(connections))
     graph_system = []
 
-    for i in range(0,n_nodes):
-        aux = []
-        if i == id-1:
-            insert_connections_row_within_graph(i,n_nodes,connections)
-        elif previous_matrix[i] is not None:        # If len(previous_matrix[i]) <= n_nodes, then we should add an array with n_nodes-len(previous_matrix[i]) length to full the list of possible connections, with -1.0 because it was not indicated the connections between them
-            aux.append(previous_matrix[i])
-            rest_of_them_aux = [-1.0] * (n_nodes-len(previous_matrix[i]))
-            aux.append(rest_of_them_aux)
+    #for i in range(0,n_nodes):
+    #    aux = []
+    #    if i == id-1:
+    #        insert_connections_row_within_graph(i,n_nodes,connections)
 
-            graph_system[i] = copy.deepcopy(aux)
+    #    elif i < len(graph_system):        # If len(previous_matrix[i]) <= n_nodes, then we should add an array with n_nodes-len(previous_matrix[i]) length to full the list of possible connections, with -1.0 because it was not indicated the connections between them
+    #        aux.append(previous_matrix[i])
+    #        rest_of_them_aux = [-1.0] * (n_nodes-len(previous_matrix[i]))
+    #        aux.append(rest_of_them_aux)
+
+    #        graph_system[i] = copy.deepcopy(aux)
+    #    elif previous_matrix[i] is not None:        # If len(previous_matrix[i]) <= n_nodes, then we should add an array with n_nodes-len(previous_matrix[i]) length to full the list of possible connections, with -1.0 because it was not indicated the connections between them
+    #        aux.append(previous_matrix[i])
+    #        rest_of_them_aux = [-1.0] * (n_nodes-len(previous_matrix[i]))
+    #        aux.append(rest_of_them_aux)
+
+    #        graph_system[i] = copy.deepcopy(aux)
+    #    else:
+    #      ##  logging.info("You should not have executed this code in average conditions!!!")
+    #        logging.info("It is supposed in a future connections with "+str(id)+" node are given")   # If it should be changed in a future, it will enter into the first conditional block (condition i==id-1)
+    #        aux = [-1.0] * (n_nodes)
+    #        graph_system[i] = copy.deepcopy(aux)
+    for i in range(n_nodes):
+        if i == id - 1:
+            # Lógica para insertar o actualizar conexiones para el nodo específico
+            insert_connections_row_within_graph(i, n_nodes, connections)
         else:
-          ##  logging.info("You should not have executed this code in average conditions!!!")
-            logging.info("It is supposed in a future connections with "+str(id)+" node are given")   # If it should be changed in a future, it will enter into the first conditional block (condition i==id-1)
-            aux = [-1.0] * (n_nodes)
-            graph_system[i] = copy.deepcopy(aux)
+            if previous_matrix[i] is not None:
+                # Extiende la lista de conexiones existente con -1.0 si es necesario
+                aux = previous_matrix[i] + [-1.0] * (n_nodes - len(previous_matrix[i]))
+            else:
+                # Registra o inicializa conexiones como no disponibles (-1.0) para nuevos nodos
+                aux = [-1.0] * n_nodes
+                graph_system[i] = aux
+
 
 # Auxiliar function for 'resizing_connections_matrix'. Given a list of nodes, it returns the maximum id (it is supposed 'connections' could not be ordered)
 def get_max_id_node(connections):
-    max_id = connections[0][0]
+    first_key = next(iter(connections[0]))
+    max_id = first_key
 
     for p in connections:
-        max_id = max(max_id,p[0])
-    return max_id
+        max_id = max(max_id,next(iter(p)))
+    
+    return int(max_id)
 
 def insert_connections_row_within_graph(i,n_nodes,connections):
     aux = [-1.0]*(n_nodes)
     aux[i] = 0.0
+    id_nodes_with_connections = [int(list(d.keys())[0]) for d in connections]
 
-    id_nodes_with_connections = list(connections.keys())
     for j in range(n_nodes):        # j starts in 0 and goes to n_nodes-1
         if j+1 in id_nodes_with_connections:    # id_nodes_with_connections has elements between 1 and n_nodes
-            aux[j] = connections[j][1]
+            diccionario_buscado = next((d for d in connections if str(j+1) in d), None)
+            aux[j] = diccionario_buscado[str(j+1)]
 
-    if graph_system[i] is not None: # Changing connections of a node that exists (example of use: a node has fallen)
-        graph_system[i] = copy.deepcopy(aux)
-    else:
+    print(aux)
+    print(graph_system)
+    if graph_system == []:
         graph_system.append(copy.deepcopy(aux)) # Node i+1 did not exist within the graph
+    else:
+        if graph_system[i] is not None: # Changing connections of a node that exists (example of use: a node has fallen)
+            graph_system[i] = copy.deepcopy(aux)
+        else:
+            graph_system.append(copy.deepcopy(aux)) # Node i+1 did not exist within the graph
 
 # INPUT: object that represents a MOEA problem
 # RETURN: MOEA problem with functions must be runned set
@@ -586,7 +615,7 @@ def introduceFunction():
    #     command: ''
    # }
 
-   return copy.deepcopy(function_command)
+    return copy.deepcopy(function_command)
 
 # ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -662,7 +691,7 @@ if __name__ == "__main__":
         processRunningMOEA.join()
             
     else:
-        print("At least one function must be given")
+        print("File necessary: A list of JSON with system features. An example 'python moea_problem_broker.py --features tests/system_examples/system1-4_nodes.txt  --reload True'")
         exit(-1)
 
 
