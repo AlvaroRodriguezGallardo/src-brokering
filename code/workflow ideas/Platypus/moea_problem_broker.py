@@ -1,4 +1,4 @@
-from platypus import NSGAII,SPEA2,MOEAD,CMAES,OMOPSO,IBEA, Problem, Real,Integer   # Differential evolution algorithm? OMOPSO algorithm?
+from platypus import NSGAII,SPEA2,MOEAD,CMAES,OMOPSO,IBEA, Problem, Real,Integer, SBX, PM, CompoundOperator   # Differential evolution algorithm? OMOPSO algorithm?
 import numpy as np
 import random
 import matplotlib.pyplot as plt
@@ -11,7 +11,8 @@ import logging
 import heapq
 import copy  
 import queue
-import multiprocessing
+#import multiprocessing
+import threading
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s') 
 # For execution time, we use expression {1/(n_cores)^p}, where p depemds on hardware technology used, i.e, p_CPU < p_ARM < p_GPU. Justification is explained in https://github.com/AlvaroRodriguezGallardo/src-brokering/blob/main/docs/broker/MOEA/broker_optimisation_algorithm.pdf
 # Variables for a distribute system
@@ -41,6 +42,9 @@ NUMBER_CPU = 1
 NUMBER_GPU = 2
 NUMBER_ARM = 3
 
+# No queda muy bien poner esto aquí pero para testear lo pongo :)
+P_variables_decision = 3
+
 class MOEAforbroker(Problem):    
     def __init__(self, N_functions_tuplas=2, P_decision_var=3):
         self.function = None
@@ -54,11 +58,11 @@ class MOEAforbroker(Problem):
             aux.append(Real(0, max_gpus_in_each_node[i]))  
             aux.append(Real(0, max_arms_in_each_node[i]))  
 
-        for j in range(0,max_node_in_graph,3):
+        for j in range(0,P_decision_var * max_node_in_graph,P_decision_var):
             self.types[j+1] = aux[j]
             self.types[j+2] = aux[j+1]
             self.types[j+3] = aux[j+2]
-
+      #  print(self.types)
         # Definición de restricciones
         self.constraints[:] = [not_zero_at_same_time]  # Asegúrate de que esta función esté definida correctamente.
 
@@ -72,7 +76,7 @@ class MOEAforbroker(Problem):
         # It is supposed 'values' a dictionary as it is inisialised in main function
         # Evaluation function is used to evaluate execution planning given
 
-        t_for_f,e_for_f = evaluate_function(values,func)
+        t_for_f,e_for_f = evaluate_function(values,self.function)
         t_exec = t_exec + t_for_f
         e_consumption = e_consumption + e_for_f
 
@@ -144,10 +148,10 @@ def inferredTimeOnNumberOfCores(time,cpu_cores,gpu_cores,arm_cores):
     distribution_cpu = (1.0)*cpu_cores/total_cores
     distribution_gpu = (1.0)*gpu_cores/total_cores
     distribution_arm = (1.0)*arm_cores/total_cores
-
-    time_cpu = (1.0/(distribution_cpu)**p_CPU) * time
-    time_gpu = (1.0/(distribution_gpu)**p_GPU) * time
-    time_arm = (1.0/(distribution_arm)**p_ARM) * time
+    
+    time_cpu = (1.0/(distribution_cpu)**p_CPU) * time if distribution_cpu != 0.0 else 0.0
+    time_gpu = (1.0/(distribution_gpu)**p_GPU) * time if distribution_gpu != 0.0 else 0.0
+    time_arm = (1.0/(distribution_arm)**p_ARM) * time if distribution_arm != 0.0 else 0.0
 
     return (time_cpu+time_gpu+time_arm)
 
@@ -196,6 +200,7 @@ def getNodesWithDatablock(datablock,lista_candidatos=[]):
     return lista_candidatos
 
 def inverseProblem(inverse_graph_system):
+    global graph_system
     n = len(graph_system)
     for i in range(0,n):
         row = []
@@ -210,7 +215,8 @@ def inverseProblem(inverse_graph_system):
     return inverse_graph_system
 
 def DykstraAlgorithm(start,end):
-    n = len(graph)
+    global graph_system
+    n = len(graph_system)
     distances = [float('inf')] * n
     distances[start] = 0
     queue = [(0, start)]
@@ -241,8 +247,8 @@ def getTCommunicationMinimo(id_nodo,nodes_needed_for_a_datablock):
         distances.append(DykstraAlgorithm(id_nodo-1,an_end_node-1))
 
     if distances:
-        end_node = lista_distancias.index(min(lista_distancias))+1
-        min_distance = lista_distancias[end_node-1]
+        end_node = distances.index(min(distances))+1
+        min_distance = distances[end_node-1]
     else:
         min_distance = float('inf')
         end_node = -1
@@ -286,7 +292,7 @@ def getRandomEnergy():
 #   - node_load: Which is node_load in the last x days?--> float \in [0,1] 
 # Evaluation function receives a dictionary 'solution' which is the proposed one to the algorithm
 
-# EXTENDER FUNCIÓN OBJETIVO A P VARIABLES Y M NODOS
+# EXTENDER FUNCIÓN OBJETIVO A P VARIABLES Y M NODOS-->DONE
 def evaluate_function(values,my_function):
     id_nodo = values[0]
     my_planning = values[1:]
@@ -317,9 +323,9 @@ def evaluate_function(values,my_function):
 #   - If get_data_other_nodes.isEmpty() then needed data will be within node.
 
 def getExecutionTimePlanning(id_nodo,data_needed,node_load,planning):
-    logging.info("Execution time with a planning. CPU cores: "+str(cpu_cores)+", GPU cores: "+str(gpu_cores)+" and ARM cores: "+str(arm_cores))
+    logging.info("Execution time with a planning. CPU cores: "+str(obtenerDeNodoNVariableK(planning,id_nodo,NUMBER_CPU))+", GPU cores: "+str(obtenerDeNodoNVariableK(planning,id_nodo,NUMBER_GPU))+" and ARM cores: "+str(obtenerDeNodoNVariableK(planning,id_nodo,NUMBER_ARM)))
     
-    time = executionTimePlanned(id_nodo,get_data_other_nodes,planning)
+    time = executionTimePlanned(id_nodo,data_needed,planning)
 
     logging.info("Node load: "+str(node_load))
     logging.info("Total execution time depending on node_load is "+str((1.0+node_load)*time))
@@ -363,7 +369,7 @@ def executionTimePlanned(id_nodo,data_needed,planning):
         t_i_j_final = t_i_j
 
         for id in nodes_needed:
-            time,_ = getTCommunicationMinimo(id,-1,[id_nodo])   # Solo devolver tiempo comunicación nodo más cercano con el anterior data_block al nodo actual. Caso particular del anterior
+            time,_ = getTCommunicationMinimo(id,[id_nodo])   # Solo devolver tiempo comunicación nodo más cercano con el anterior data_block al nodo actual. Caso particular del anterior
             t_j_i = t_j_i + time                                # Pongo [id_nodo] para reutilizar la función y que reciba las estructuras de datos como espera manejarlas
 
         t_j_i_final = t_j_i
@@ -383,7 +389,7 @@ def executionTimePlanned(id_nodo,data_needed,planning):
     tProcessingData = getTProcessingData('wsclean -size 3072 3072 -scale 0.7amin -niter 10000 -mgain 0.8 -auto-threshold 3 obs.ms')
 
     #tExecutingFunction = (tAccessData+tProcessingData) / (cpu_cores**p_hardware)
-
+    
     tExecutingFunction = inferredTimeOnNumberOfCores(tAccessData+tProcessingData,obtenerDeNodoNVariableK(planning,id_nodo,NUMBER_CPU),obtenerDeNodoNVariableK(planning,id_nodo,NUMBER_GPU),obtenerDeNodoNVariableK(planning,id_nodo,NUMBER_ARM))
 
     return (tExecutingFunction + t_i_j_final + t_j_i_final + time_other_nodes_final)
@@ -391,22 +397,23 @@ def executionTimePlanned(id_nodo,data_needed,planning):
 # Time spent getting data within node in which function is executed
 def getTAccessData(my_function):
     # IMPLEMENTAR MODELO. ACCEDER A LOS DATOS. SE SUPONEN TODOS LOS DAROS NECESARIOS DENTRO DEL NODO
-    return None
+    logging.info("Function "+str(my_function)+" has got needed data")
+    return getRandomTime()
 
 # Time spent processing data within node. Previously this data has been got
-def tProcessingData(my_function):
+def getTProcessingData(my_function):
 
-    init = time.time()
+    #init = time.time()
     # Aquí se ejecuta 'my_function'. Se puede hacer porque todos los datos están a mano, accesibles dentro del nodo
-    try:
-        subprocess.check_output(my_function, shell=True, text=True)
-    except subprocess.CalledProcessError as e:
-        logging.error("Error in tProcessingData: "+str(e))
+    #try:
+    #    subprocess.check_output(my_function, shell=True, text=True)
+    #except subprocess.CalledProcessError as e:
+    #    logging.error("Error in tProcessingData: "+str(e))
 
-    end = time.time()
+    #end = time.time()
     logging.info("Function "+str(my_function)+" has been processed")
-
-    return (end-init)
+    return getRandomTime()
+    #return (end-init)
 
 # -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -590,18 +597,16 @@ def insert_connections_row_within_graph(i,n_nodes,connections):
 # RETURN: MOEA problem with functions must be runned set
 
 def setting_functions_to_run(functions):
+    global commu_get_func_and_alg
     print("Function "+functions+" will be run in a future")
     commu_get_func_and_alg.put(functions)
 
 # INPUT: COMMAND WITH NECESSARY SOFTWARE, PARAMETERS AND DATA
 # NOTA: Por ahora reducir los inputs a parámetros->flag --param, datos->flag --data, y así
 def introduceFunction():
+    global commu_get_func_and_alg
     print("Please, introduce a function to be run within the system")
     function_command=input("Function command: ")
-
-   # func = {
-   #     command: ''
-   # }
 
     return copy.deepcopy(function_command)
 
@@ -609,13 +614,17 @@ def introduceFunction():
 
 def getMostImportantFunction():
     # In a future, here we could do an algorithm that given a queue, it gets the most important function. On the other hand, with a priority queue we can use this code
+    global commu_get_func_and_alg
+
     return copy.deepcopy(commu_get_func_and_alg.get())  # As Queue.queue is implemented, if queue is empty, it should wait until some function is put within it
 
 def runningMOEA():
-    problem = MOEAforbroker(N_functions_tuplas=2,P_decision_var=3)
 
-    algorithms = [NSGAII(problem)]
+    problem = MOEAforbroker(N_functions_tuplas=2,P_decision_var=3)
+    variator = CompoundOperator(SBX(probability=1.0), PM(probability=1.0))
+    algorithms = [NSGAII(problem,variator=variator)]
     while(True):
+
         function = getMostImportantFunction()
 
         # SI QUEREMOS UN SISTEMA DINÁMICO, TAL QUE INTRODUZCO UNA FUNCIÓN Y SE REEVALÚA AL SISTEMA, SE PODRÍA LANZAR EL SIGUIENTE BUCLE COMO UN PROCESO APARTE, Y EL PRINCIPAL SE DEDICA A PEDIR FUNCIONES A LANZAR 
@@ -668,7 +677,7 @@ if __name__ == "__main__":
         upload_new_features(features) 
 
        # processGettingFunctions = multiprocessing.Process(target=gettingFunctionsToRun)
-        processRunningMOEA = multiprocessing.Process(target=runningMOEA)
+        processRunningMOEA = threading.Thread(target=runningMOEA)
 
         # Start running program
         #processGettingFunctions.start()
