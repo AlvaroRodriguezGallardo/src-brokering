@@ -50,7 +50,6 @@ class MOEAforbroker(Problem):
         self.function = None
         super(MOEAforbroker, self).__init__(P_decision_var * max_node_in_graph + 1, N_functions_tuplas)
         
-        # Asegúrate de que los siguientes parámetros sean pasados al constructor o definidos de alguna manera.
         self.types[0] = Integer(1, max_node_in_graph)
         aux = []
         for i in range(max_node_in_graph):
@@ -64,7 +63,7 @@ class MOEAforbroker(Problem):
             self.types[j+3] = aux[j+2]
       #  print(self.types)
         # Definición de restricciones
-        self.constraints[:] = [not_zero_at_same_time]  # Asegúrate de que esta función esté definida correctamente.
+        self.constraints[:] = [not_zero_at_same_time]
 
         # Definir direcciones de optimización
         self.directions[:] = [Problem.MINIMIZE] * N_functions_tuplas
