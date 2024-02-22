@@ -11,6 +11,7 @@ import logging
 import heapq
 import copy  
 import queue
+import plotly.graph_objects as go
 #import multiprocessing
 import threading
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s') 
@@ -18,7 +19,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 # Variables for a distribute system
 
 commu_get_func_and_alg = queue.Queue()
-
+commu_results = queue.Queue()
 
 # It is an example for simulation. It should be chosen using experiments with real data
 p_CPU = 1
@@ -626,7 +627,7 @@ def getMostImportantFunction():
     return copy.deepcopy(commu_get_func_and_alg.get())  # As Queue.queue is implemented, if queue is empty, it should wait until some function is put within it
 
 def runningMOEA():
-
+    global commu_results
     problem = MOEAforbroker(N_functions_tuplas=2,P_decision_var=3)
     variator = CompoundOperator(SBX(probability=1.0), PM(probability=1.0))
     algorithms = [NSGAII(problem,variator=variator)]
@@ -645,30 +646,35 @@ def runningMOEA():
             objective_time = []   # First objective
             objective_energy = []   # Second objective
 
-            for solution in optimal_solutions:  # I store every point of optimal solutions for algorithm
+            for solution in optimal_solutions:
+                # Almacenar cada punto de las soluciones óptimas
                 objective_time.append(solution.objectives[0])
                 objective_energy.append(solution.objectives[1])
-                print("Execution time: "+str(solution.objectives[0])+". Energy Consumption: "+str(solution.objectives[1]))
+                print(f"Execution time: {solution.objectives[0]}. Energy Consumption: {solution.objectives[1]}")
 
-                # Create graphics
-                fig,ax = plt.subplots()
+            fig = go.Figure(data=go.Scatter(x=objective_time, y=objective_energy, mode='markers', text=[f"Time: {t}, Energy: {e}" for t, e in zip(objective_time, objective_energy)], hoverinfo='text'))
 
-                # Writing points in graphic
-                ax.scatter(objective_time,objective_energy)
+            fig.update_layout(title=f'Optimal Solutions for {alg}',xaxis_title='Execution time',yaxis_title='Energy consumption',hovermode='closest')
 
-                # Adding some specifications
-                ax.set_xlabel('Execution time')
-                ax.set_ylabel('Energy consumption')
-                ax.set_title(f'Optimal Solutions for {str(alg)}')
-
-                # Saving graphic
-                plt.savefig(f'{str(function)}_pareto_front.png')
+            commu_results.put(fig)
 
 
 def gettingFunctionsToRun():
+    global commu_results
     while True:
         func = introduceFunction()
         setting_functions_to_run(func)
+
+        showingResults(commu_results.get(),func)
+
+
+def showingResults(fig,function):
+    choice = input("Do you want to save it as a png (1) or do you want to visualize it(2)?")
+    print(choice)
+    if choice == "1":
+        fig.write_image(f'{function}_pareto_front.png')
+    else:
+        fig.show()
 
 # ---------------------------------------------------------------------------- MAIN FUNCTION -------------------------------------------------------------------------------------------------
 
