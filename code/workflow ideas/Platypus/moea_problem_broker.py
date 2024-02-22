@@ -645,14 +645,18 @@ def runningMOEA():
 
             objective_time = []   # First objective
             objective_energy = []   # Second objective
+            decision_variables = []
 
             for solution in optimal_solutions:
-                # Almacenar cada punto de las soluciones óptimas
                 objective_time.append(solution.objectives[0])
                 objective_energy.append(solution.objectives[1])
-                print(f"Execution time: {solution.objectives[0]}. Energy Consumption: {solution.objectives[1]}")
+                
+                decision_variables.append(solution.variables)
+                
+                print(f"Execution time: {solution.objectives[0]}, Energy Consumption: {solution.objectives[1]}")
+                print(f"Variables (CPU, GPU, ARM): {solution.variables}")
 
-            fig = go.Figure(data=go.Scatter(x=objective_time, y=objective_energy, mode='markers', text=[f"Time: {t}, Energy: {e}" for t, e in zip(objective_time, objective_energy)], hoverinfo='text'))
+            fig = go.Figure(data=go.Scatter(x=objective_time, y=objective_energy, mode='markers',text=[f"Time: {t}, Energy: {e}, Vars: {v}" for t, e, v in zip(objective_time, objective_energy, decision_variables)],hoverinfo='text'))
 
             fig.update_layout(title=f'Optimal Solutions for {alg}',xaxis_title='Execution time',yaxis_title='Energy consumption',hovermode='closest')
 
@@ -670,7 +674,7 @@ def gettingFunctionsToRun():
 
 def showingResults(fig,function):
     choice = input("Do you want to save it as a png (1) or do you want to visualize it(2)?")
-    print(choice)
+
     if choice == "1":
         fig.write_image(f'{function}_pareto_front.png')
     else:
