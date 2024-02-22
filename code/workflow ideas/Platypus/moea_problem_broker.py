@@ -53,9 +53,9 @@ class MOEAforbroker(Problem):
         self.types[0] = Integer(1, max_node_in_graph)
         aux = []
         for i in range(max_node_in_graph):
-            aux.append(Real(0, max_cpus_in_each_node[i]))  
-            aux.append(Real(0, max_gpus_in_each_node[i]))  
-            aux.append(Real(0, max_arms_in_each_node[i]))  
+            aux.append(Real(0, max_cpus_in_each_node[i])) if max_cpus_in_each_node[i] > 0 else aux.append(Real(-10.0, -5.0))
+            aux.append(Real(0, max_gpus_in_each_node[i])) if max_gpus_in_each_node[i] > 0 else aux.append(Real(-10.0,-5.0))
+            aux.append(Real(0, max_arms_in_each_node[i])) if max_arms_in_each_node[i] > 0 else aux.append(Real(-10.0,-5.0))
 
         for j in range(0,P_decision_var * max_node_in_graph,P_decision_var):
             self.types[j+1] = aux[j]
@@ -63,7 +63,7 @@ class MOEAforbroker(Problem):
             self.types[j+3] = aux[j+2]
       #  print(self.types)
         # Definición de restricciones
-        self.constraints[:] = [not_zero_at_same_time]
+        self.constraints[:] = [not_zero_at_same_time]  
 
         # Definir direcciones de optimización
         self.directions[:] = [Problem.MINIMIZE] * N_functions_tuplas
@@ -142,11 +142,15 @@ def obtenerDeNodoNVariableK(lista,N_nodo,K_variable):
 # 3/10 -->arm
 
 def inferredTimeOnNumberOfCores(time,cpu_cores,gpu_cores,arm_cores):
-    total_cores = cpu_cores+gpu_cores+arm_cores
+    aux_cpu = cpu_cores if cpu_cores > 0 else 0.0
+    aux_gpu = gpu_cores if gpu_cores > 0 else 0.0
+    aux_arm = arm_cores if arm_cores > 0 else 0.0
 
-    distribution_cpu = (1.0)*cpu_cores/total_cores
-    distribution_gpu = (1.0)*gpu_cores/total_cores
-    distribution_arm = (1.0)*arm_cores/total_cores
+    total_cores = aux_cpu+aux_gpu+aux_arm
+
+    distribution_cpu = (1.0)*aux_cpu/total_cores
+    distribution_gpu = (1.0)*aux_gpu/total_cores
+    distribution_arm = (1.0)*aux_arm/total_cores
     
     time_cpu = (1.0/(distribution_cpu)**p_CPU) * time if distribution_cpu != 0.0 else 0.0
     time_gpu = (1.0/(distribution_gpu)**p_GPU) * time if distribution_gpu != 0.0 else 0.0
@@ -155,11 +159,15 @@ def inferredTimeOnNumberOfCores(time,cpu_cores,gpu_cores,arm_cores):
     return (time_cpu+time_gpu+time_arm)
 
 def inferredEnergyOnNumberOfCores(energy,cpu_cores,gpu_cores,arm_cores):
-    total_cores = cpu_cores+gpu_cores+arm_cores
+    aux_cpu = cpu_cores if cpu_cores > 0 else 0.0
+    aux_gpu = gpu_cores if gpu_cores > 0 else 0.0
+    aux_arm = arm_cores if arm_cores > 0 else 0.0
 
-    distribution_cpu = (1.0)*cpu_cores/total_cores
-    distribution_gpu = (1.0)*gpu_cores/total_cores
-    distribution_arm = (1.0)*arm_cores/total_cores
+    total_cores = aux_cpu+aux_gpu+aux_arm
+
+    distribution_cpu = (1.0)*aux_cpu/total_cores
+    distribution_gpu = (1.0)*aux_gpu/total_cores
+    distribution_arm = (1.0)*aux_arm/total_cores
 
     energy_cpu = (distribution_cpu**p_CPU) * energy
     energy_gpu = (distribution_gpu**p_GPU) * energy
@@ -237,7 +245,7 @@ def DykstraAlgorithm(start,end):
 
     return float('inf')
 
-# Time spent communicating with other node. It is a prototype, but distance_i_j and bandwith are not constants
+# Time spent communicating with other node. It is a prototype, but distance_i_j and bandwith are not constants (it means, in a moment it could change, not represented by a function)
 def getTCommunicationMinimo(id_nodo,nodes_needed_for_a_datablock):
     # COMPLETAR: Algoritmo de Dijkstra. Distancia mínima. Si es 0, son el mismo, si devuelve inf no están conectados
     distances = []
