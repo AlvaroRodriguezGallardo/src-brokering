@@ -3,7 +3,7 @@
 # Constants that represents params we use for wsclean or other library
 
 # Param: Number of CPUs
-
+CPU_LIMIT = "cpulimit"
 # Where we should find a .sif file
 BIND = "--bind"
 # Library we want to use. By default, LIBRARY="wsclean"
