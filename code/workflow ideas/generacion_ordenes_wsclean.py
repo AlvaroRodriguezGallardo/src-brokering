@@ -44,11 +44,11 @@ MULTISCALE_SCALE_BIAS = "-multiscale-scale-bias"
 NAME = "-name"
 
 # Constans that relate parameters
-IM_SIZE_SCALE_MAX = 10      # +=1, from 2 to 10, relates imsize with scale
-AUTO_MASK_C = 2             # +=2, to 40
-AUTO_THRESHOLD_C = 0.05  # += 0.05, to 1.0
-N_ITER = 100    # No more
-CHANNELS_OUT=8  # +=2 to 16
+IM_SIZE_SCALE_MAX = 10      # imsize+=1, imsize \in {2,..10}, by default 8, relates imsize with scale
+AUTO_MASK_C_M = 8            # auto_mask+=1, auto_maks \in {3,..8}, by default 5
+AUTO_THRESHOLD_C_M = 3  # aut+= 0.1, to 3.0, by default 3 (CONDITION: auto_threshold < auto_mask)
+N_ITER_MAX = 100    # niter \in {1000,2000,5000,20000}
+CHANNELS_OUT_M=8  # channels_out+=2, channels_out \in {4,..,16}, by default 8
 
 #------------------------------------------------------ INPUT ----------------------------------------------------------------------
 
