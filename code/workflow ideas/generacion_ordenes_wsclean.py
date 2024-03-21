@@ -4,7 +4,7 @@ import math
 # Constants that represents params we use for wsclean or other library
 
 # Param: Number of CPUs
-CPU_LIMIT = "cpulimit"  # \in {1,2,3,4} By default 1
+CPU_LIMIT = "-j"  # \in {1,2,3,4} By default 1
 # Where we should find a .sif file
 BIND = "--bind"
 # Library we want to use. By default, LIBRARY="wsclean"
@@ -51,8 +51,8 @@ CPU_MAX = 4
 IM_SIZE_SCALE_MAX = 10      # imsize+=1, imsize \in {2,..10}, by default 8, relates imsize with scale
 AUTO_MASK_C_M = 8            # auto_mask+=1, auto_maks \in {3,..8}, by default 5
 AUTO_THRESHOLD_C_M = 3  # aut+= 0.1, to 3.0, by default 3 (CONDITION: auto_threshold < auto_mask)
-N_ITER_MAX = 100    # niter \in {1000,2000,5000,20000}
-CHANNELS_OUT_M=8  # channels_out+=2, channels_out \in {4,..,16}, by default 8
+#N_ITER_MAX = 100    # niter \in {1000,2000,5000,20000}
+CHANNELS_OUT_M=16  # channels_out+=2, channels_out \in {4,..,16}, by default 8
 
 DEFAULT_CPU = 1
 DEFAULT_IMSIZE = 1280
@@ -95,6 +95,15 @@ def writingWithinFile(file,order):
   #  file.write(f"echo 'Energy consumed: $(($energy_end - $energy_start)) units' >> results.txt\n")
     file.write("echo '---' >> results.txt\n\n")
 
+#------------------------------------------------------ AUX FUNCTIONS ----------------------------------------------------------------------
+
+def createOrder(order,library,sif_file,image,fits_file,ms_file,n_cpu,nit,auto_mask,auto_threshold,channels_out,scale,imsize):
+    order = "singularity exec "+BIND+" /mnt:/mnt "+sif_file + " "+ library
+                + NITER +" "+ str(nit)+" "+CPU_LIMIT+" "+str(n_cpu)+" " + AUTO_MASK + " "+str(auto_mask)+" " + AUTO_THRESHOLD+" " + str(auto_threshold)
+                + " " + CHANNELS_OUT + " " + str(channels_out) +" "+ JOIN_CHANNELS + " "+SCALE +" "+ str(DEFAULT_SCALE/proportional_im_size)+"asec"+
+                + " " + SIZE + " " + str(DEFAULT_IMSIZE*proportional_im_size)+" " + str(DEFAULT_IMSIZE*proportional_im_size) +" "+ FITS_MASK + " "+ fits_file + " " +NAME+" "
+                + image +" "+ ms_file
+
 #------------------------------------------------------ CHANGING PARAMS ----------------------------------------------------------------------
 
 def changingImSizeScale(file,library,sif_file,image,fits_file,ms_file):
@@ -110,11 +119,7 @@ def changingImSizeScale(file,library,sif_file,image,fits_file,ms_file):
             break
         if math.trun(DEFAULT_SCALE/proportional_im_size) == math.trun(DEFAULT_IMSIZE*proportional_im_size):
             for nit in N_ITERS:
-                order = "singularity exec "+BIND+" /mnt:/mnt "+sif_file+ CPU_LIMIT+" "+str(n_cpu) + " "+ library
-                + NITER + str(nit) + AUTO_MASK + " "+str(auto_mask)+" " + AUTO_THRESHOLD+" " + str(auto_threshold)
-                + " " + CHANNELS_OUT + " " + str(channels_out) +" "+ JOIN_CHANNELS + " "+SCALE +" "+ str(DEFAULT_SCALE/proportional_im_size)+"asec"+
-                + " " + SIZE + " " + str(DEFAULT_IMSIZE*proportional_im_size)+" " + str(DEFAULT_IMSIZE*proportional_im_size) +" "+ FITS_MASK + " "+ fits_file + " " +NAME+" "
-                + image +" "+ ms_file
+                createOrder(order,library,sif_file,image,fits_file,ms_file,n_cpu,nit,auto_mask,auto_threshold,channels_out,scale,imsize)
                 
                 writingWithinFile(file,order)
 
@@ -132,13 +137,9 @@ def changingAutoMask(file,library,sif_file,image,fits_file,ms_file):
 
     for auto_mask in range(3,AUTO_MASK_C_M+1,1):
         for nit in N_ITERS:
-                order = "singularity exec "+BIND+" /mnt:/mnt "+sif_file+ CPU_LIMIT+" "+str(n_cpu) + " "+ library
-                + NITER + str(nit) + AUTO_MASK + " "+str(auto_mask)+" " + AUTO_THRESHOLD+" " + str(auto_threshold)
-                + " " + CHANNELS_OUT + " " + str(channels_out) +" "+ JOIN_CHANNELS + " "+SCALE +" "+ str(scale)+"asec"+
-                + " " + SIZE + " " + str(im_size)+" " + str(im_size) +" "+ FITS_MASK + " "+ fits_file + " " +NAME+" "
-                + image +" "+ ms_file
+            createOrder(order,library,sif_file,image,fits_file,ms_file,n_cpu,nit,auto_mask,auto_threshold,channels_out,scale,imsize)
 
-                writingWithinFile(file,order)
+            writingWithinFile(file,order)
 
 
 def changingAutoThreshold(file,library,sif_file,image,fits_file,ms_file):
@@ -150,15 +151,11 @@ def changingAutoThreshold(file,library,sif_file,image,fits_file,ms_file):
     channels_out = DEFAULT_CHANNELS_OUT
     order=""
 
-    for auto_threshold in range(0.1,3.0+0.1,0.1):
+    for auto_threshold in range(0.1,AUTO_THRESHOLD_C_M+0.1,0.1):
         for nit in N_ITERS:
-                order = "singularity exec "+BIND+" /mnt:/mnt "+sif_file+ CPU_LIMIT+" "+str(n_cpu) + " "+ library
-                + NITER + str(nit) + AUTO_MASK + " "+str(auto_mask)+" " + AUTO_THRESHOLD+" " + str(auto_threshold)
-                + " " + CHANNELS_OUT + " " + str(channels_out) +" "+ JOIN_CHANNELS + " "+SCALE +" "+ str(scale)+"asec"+
-                + " " + SIZE + " " + str(im_size)+" " + str(im_size) +" "+ FITS_MASK + " "+ fits_file + " " +NAME+" "
-                + image +" "+ ms_file
+            createOrder(order,library,sif_file,image,fits_file,ms_file,n_cpu,nit,auto_mask,auto_threshold,channels_out,scale,imsize)
 
-                writingWithinFile(file,order)
+            writingWithinFile(file,order)
 
 
 def changingChannelsOut(file,library,sif_file,image,fits_file,ms_file):
@@ -170,15 +167,11 @@ def changingChannelsOut(file,library,sif_file,image,fits_file,ms_file):
     #channels_out = 4
     order=""
 
-    for channels_out in range(4,16,2):
+    for channels_out in range(4,CHANNELS_OUT_M,2):
         for nit in N_ITERS:
-                order = "singularity exec "+BIND+" /mnt:/mnt "+sif_file+ CPU_LIMIT+" "+str(n_cpu) + " "+ library
-                + NITER + str(nit) + AUTO_MASK + " "+str(auto_mask)+" " + AUTO_THRESHOLD+" " + str(auto_threshold)
-                + " " + CHANNELS_OUT + " " + str(channels_out) +" "+ JOIN_CHANNELS + " "+SCALE +" "+ str(scale)+"asec"+
-                + " " + SIZE + " " + str(im_size)+" " + str(im_size) +" "+ FITS_MASK + " "+ fits_file + " " +NAME+" "
-                + image +" "+ ms_file
+            createOrder(order,library,sif_file,image,fits_file,ms_file,n_cpu,nit,auto_mask,auto_threshold,channels_out,scale,imsize)
 
-                writingWithinFile(file,order)
+            writingWithinFile(file,order)
 
 #------------------------------------------------------ MAIN ----------------------------------------------------------------------
 
