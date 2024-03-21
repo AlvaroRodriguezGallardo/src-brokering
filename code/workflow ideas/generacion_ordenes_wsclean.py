@@ -97,12 +97,10 @@ def writingWithinFile(file,order):
 
 #------------------------------------------------------ AUX FUNCTIONS ----------------------------------------------------------------------
 
-def createOrder(order,library,sif_file,image,fits_file,ms_file,n_cpu,nit,auto_mask,auto_threshold,channels_out,scale,imsize):
-    order = "singularity exec "+BIND+" /mnt:/mnt "+sif_file + " "+ library
-                + NITER +" "+ str(nit)+" "+CPU_LIMIT+" "+str(n_cpu)+" " + AUTO_MASK + " "+str(auto_mask)+" " + AUTO_THRESHOLD+" " + str(auto_threshold)
-                + " " + CHANNELS_OUT + " " + str(channels_out) +" "+ JOIN_CHANNELS + " "+SCALE +" "+ str(DEFAULT_SCALE/proportional_im_size)+"asec"+
-                + " " + SIZE + " " + str(DEFAULT_IMSIZE*proportional_im_size)+" " + str(DEFAULT_IMSIZE*proportional_im_size) +" "+ FITS_MASK + " "+ fits_file + " " +NAME+" "
-                + image +" "+ ms_file
+def createOrder(library,sif_file,image,fits_file,ms_file,n_cpu,nit,auto_mask,auto_threshold,channels_out,scale,imsize):
+    return "singularity exec " + BIND + " /mnt:/mnt " + sif_file + " " + library+ NITER + " " + str(nit) + " " + CPU_LIMIT + " " + str(n_cpu) + " "+ AUTO_MASK + " " + str(auto_mask) + " " + AUTO_THRESHOLD + " "+ str(auto_threshold) + " " + CHANNELS_OUT + " " + str(channels_out)+ " " + JOIN_CHANNELS + " " + SCALE + " " + str(scale) + "asec"+ " " + SIZE + " " + str(imsize) + " "+ str(imsize) + " " + FITS_MASK + " " + fits_file+ " " + NAME + " " + image + " " + ms_file
+    
+
 
 #------------------------------------------------------ CHANGING PARAMS ----------------------------------------------------------------------
 
@@ -117,9 +115,9 @@ def changingImSizeScale(file,library,sif_file,image,fits_file,ms_file):
     while True:
         if DEFAULT_IMSIZE/proportional_im_size < 1:
             break
-        if math.trun(DEFAULT_SCALE/proportional_im_size) == math.trun(DEFAULT_IMSIZE*proportional_im_size):
+        if math.trunc(DEFAULT_SCALE/proportional_im_size) == math.trunc(DEFAULT_IMSIZE*proportional_im_size):
             for nit in N_ITERS:
-                createOrder(order,library,sif_file,image,fits_file,ms_file,n_cpu,nit,auto_mask,auto_threshold,channels_out,scale,imsize)
+                order = createOrder(library,sif_file,image,fits_file,ms_file,n_cpu,nit,auto_mask,auto_threshold,channels_out,math.trunc(DEFAULT_SCALE/proportional_im_size),math.trunc(DEFAULT_IMSIZE*proportional_im_size))
                 
                 writingWithinFile(file,order)
 
@@ -137,7 +135,7 @@ def changingAutoMask(file,library,sif_file,image,fits_file,ms_file):
 
     for auto_mask in range(3,AUTO_MASK_C_M+1,1):
         for nit in N_ITERS:
-            createOrder(order,library,sif_file,image,fits_file,ms_file,n_cpu,nit,auto_mask,auto_threshold,channels_out,scale,imsize)
+            order = createOrder(library,sif_file,image,fits_file,ms_file,n_cpu,nit,auto_mask,auto_threshold,channels_out,scale,im_size)
 
             writingWithinFile(file,order)
 
@@ -151,11 +149,13 @@ def changingAutoThreshold(file,library,sif_file,image,fits_file,ms_file):
     channels_out = DEFAULT_CHANNELS_OUT
     order=""
 
-    for auto_threshold in range(0.1,AUTO_THRESHOLD_C_M+0.1,0.1):
-        for nit in N_ITERS:
-            createOrder(order,library,sif_file,image,fits_file,ms_file,n_cpu,nit,auto_mask,auto_threshold,channels_out,scale,imsize)
+    auto_threshold_values = [x * 0.1 for x in range(int(AUTO_THRESHOLD_C_M / 0.1) + 1)]
 
-            writingWithinFile(file,order)
+    for auto_threshold in auto_threshold_values:
+        for nit in N_ITERS:
+            order = createOrder(library, sif_file, image, fits_file, ms_file, n_cpu, nit, auto_mask, auto_threshold, channels_out, scale, im_size)
+            
+            writingWithinFile(file, order)
 
 
 def changingChannelsOut(file,library,sif_file,image,fits_file,ms_file):
@@ -169,7 +169,22 @@ def changingChannelsOut(file,library,sif_file,image,fits_file,ms_file):
 
     for channels_out in range(4,CHANNELS_OUT_M,2):
         for nit in N_ITERS:
-            createOrder(order,library,sif_file,image,fits_file,ms_file,n_cpu,nit,auto_mask,auto_threshold,channels_out,scale,imsize)
+            order = createOrder(library,sif_file,image,fits_file,ms_file,n_cpu,nit,auto_mask,auto_threshold,channels_out,scale,im_size)
+
+            writingWithinFile(file,order)
+
+def changingCPUS(file,library,sif_file,image,fits_file,ms_file):
+    # n_cpu = 1
+    im_size = DEFAULT_IMSIZE
+    auto_mask = DEFAULT_AUTO_MASK
+    scale = DEFAULT_SCALE
+    auto_threshold = DEFAULT_AUTO_THRESHOLD
+    channels_out = DEFAULT_CHANNELS_OUT
+    order=""
+
+    for n_cpu in range(1,CPU_MAX+1):
+        for nit in N_ITERS:
+            order = createOrder(library,sif_file,image,fits_file,ms_file,n_cpu,nit,auto_mask,auto_threshold,channels_out,scale,im_size)
 
             writingWithinFile(file,order)
 
@@ -197,6 +212,8 @@ if __name__ == '__main__':
         changingAutoMask(file,library,sif_file,image,fits_file,ms_file)
         changingAutoThreshold(file,library,sif_file,image,fits_file,ms_file)
         changingChannelsOut(file,library,sif_file,image,fits_file,ms_file)
+        changingCPUS(file,library,sif_file,image,fits_file,ms_file)
 
     # Executable script
-    os.chmod("orders.sh",Oo755)
+    os.chmod("orders.sh",0o755)
+    print("Bash script was created successfully")
