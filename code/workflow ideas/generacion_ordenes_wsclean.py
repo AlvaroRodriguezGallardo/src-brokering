@@ -134,10 +134,11 @@ def changingAutoMask(file,library,sif_file,image,fits_file,ms_file):
     order=""
 
     for auto_mask in range(3,AUTO_MASK_C_M+1,1):
-        for nit in N_ITERS:
-            order = createOrder(library,sif_file,image,fits_file,ms_file,n_cpu,nit,auto_mask,auto_threshold,channels_out,scale,im_size)
+        if auto_mask > auto_threshold:
+            for nit in N_ITERS:
+                order = createOrder(library,sif_file,image,fits_file,ms_file,n_cpu,nit,auto_mask,auto_threshold,channels_out,scale,im_size)
 
-            writingWithinFile(file,order)
+                writingWithinFile(file,order)
 
 
 def changingAutoThreshold(file,library,sif_file,image,fits_file,ms_file):
@@ -152,10 +153,11 @@ def changingAutoThreshold(file,library,sif_file,image,fits_file,ms_file):
     auto_threshold_values = [x * 0.1 for x in range(int(AUTO_THRESHOLD_C_M / 0.1) + 1)]
 
     for auto_threshold in auto_threshold_values:
-        for nit in N_ITERS:
-            order = createOrder(library, sif_file, image, fits_file, ms_file, n_cpu, nit, auto_mask, auto_threshold, channels_out, scale, im_size)
-            
-            writingWithinFile(file, order)
+        if auto_mask > auto_threshold:
+            for nit in N_ITERS:
+                order = createOrder(library, sif_file, image, fits_file, ms_file, n_cpu, nit, auto_mask, auto_threshold, channels_out, scale, im_size)
+                
+                writingWithinFile(file, order)
 
 
 def changingChannelsOut(file,library,sif_file,image,fits_file,ms_file):
