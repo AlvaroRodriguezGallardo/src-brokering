@@ -70,7 +70,7 @@ def readFlags():
     parser.add_argument('-s', '--sif_file', type=str, help='.sif file', required=True)
     parser.add_argument('-i', '--image', type=str, help='Image', required=True)
     parser.add_argument('-m', '--ms_file', type=str, help='.ms file', required=True)
-    parser.add_argument('-f', '--fits_file',type=str,help='.ms file',required=True)
+    parser.add_argument('-f', '--fits_file',type=str,help='.fits file',required=False)
 
     args = parser.parse_args()
 
@@ -98,7 +98,7 @@ def writingWithinFile(file,order):
 #------------------------------------------------------ AUX FUNCTIONS ----------------------------------------------------------------------
 
 def createOrder(library,sif_file,image,fits_file,ms_file,n_cpu,nit,auto_mask,auto_threshold,channels_out,scale,imsize):
-    return "singularity exec " + BIND + " /mnt:/mnt " + sif_file + " " + library+ NITER + " " + str(nit) + " " + CPU_LIMIT + " " + str(n_cpu) + " "+ AUTO_MASK + " " + str(auto_mask) + " " + AUTO_THRESHOLD + " "+ str(auto_threshold) + " " + CHANNELS_OUT + " " + str(channels_out)+ " " + JOIN_CHANNELS + " " + SCALE + " " + str(scale) + "asec"+ " " + SIZE + " " + str(imsize) + " "+ str(imsize) + " " + FITS_MASK + " " + fits_file+ " " + NAME + " " + image + " " + ms_file
+    return "singularity exec " + BIND + " /mnt:/mnt " + sif_file + " " + library+ " "+NITER + " " + str(nit) + " " + CPU_LIMIT + " " + str(n_cpu) + " "+ AUTO_MASK + " " + str(auto_mask) + " " + AUTO_THRESHOLD + " "+ str(auto_threshold) + " " + CHANNELS_OUT + " " + str(channels_out)+ " " + JOIN_CHANNELS + " " + SCALE + " " + str(scale) + "asec"+ " " + SIZE + " " + str(imsize) + " "+ str(imsize) + " " + FITS_MASK + " " + fits_file+ " " + NAME + " " + image + " " + ms_file
     
 
 
@@ -196,6 +196,8 @@ if __name__ == '__main__':
     library,sif_file,image,fits_file,ms_file = readFlags()
     if library == None:
         library = LIBRARY
+    if fits_file == None:
+        fits_file = ""
 
     print(f"Library: {library}")
     print(f".sif file: {sif_file}")
